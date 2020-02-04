@@ -61,6 +61,8 @@ def callback(msg, tfBuffer):
     i_centery = msg.info.height/2
     # translate by curr_pos - centerxy to make sure the rotation is performed
     # with the robot at the center
+    # using tips from:
+    # https://stackabuse.com/affine-image-transformations-in-python-with-numpy-pillow-and-opencv/
     translation_m = np.array([[1, 0, (i_centerx-grid_y)],
                                [0, 1, (i_centery-grid_x)],
                                [0, 0, 1]])
