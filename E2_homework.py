@@ -15,7 +15,7 @@ solenoid_pin = 22
 lidar_port = 
 lidar = PyLidar2.YdLidarX4(lidar_port)
 
-def run_lidar():
+def run_lidar(): #get readings from lidar and store in a dictionary every 0.5s
     global lidar
     if (lidar.Connect()):
         print (lidar.GetDeviceInfo())
@@ -26,7 +26,7 @@ def run_lidar():
     else: 
         print('Device not connected')
 
-def action():
+def action(): #carry out requirements
     l2i = run_lidar()
     if l2i[0] == 1:
         rotation(45)
