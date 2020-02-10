@@ -6,43 +6,38 @@ Created on Wed Feb  5 20:35:52 2020
 @author: tuandung
 """
 
-import rospy
-import numpy as np
-from sensor_msgs.msg import LaserScan
+import PyLidar2
 import RPi.GPIO as GPIO
 import time 
 
 servo_pin = 21
 solenoid_pin = 22
-laser_range = np.array([])
+lidar_port = 
+lidar = PyLidar2.YdLidarX4(lidar_port)
 
-
-def get_laserscan(msg):
-    global laser_range
-
-    # create numpy array
-    laser_range = np.array([msg.ranges])
+def run_lidar():
+    global lidar
+    if (lidar.Connect()):
+        print (lidar.GetDeviceInfo())
+        surroundings = lidar.StartScanning()
+        t = time.time()
+        if (time.time() - t) == 0.5:
+            return surroundings 
+    else: 
+        print('Device not connected')
 
 def action():
-    global laser_range 
-    #start a node 
-    rospy.init_node('action', anonymous = True)
-    # subcribe to LaserScan Data 
-    rospy.Subscriber('scan', LaserScan, get_laserscan)
-    
-    rate = rospy.Rate(5) # 5 Hz
-    lr2 = laser_range[0]
-
-    if lr2 != 0:
-        rospy.loginfo(['Distance in front is ' + str(lr2)])
-    
-        if laser_range[0] == 1:
-            rotation(45)
-            solenoid_punch(1)
-            time.sleep(1)
-    else: 
-        rospy.loginfo(['Distance out of range!'])
-        rate.sleep()
+    l2i = run_lidar()
+    if l2i[0] == 1:
+        rotation(45)
+        solenoid_punch(1)
+        time.sleep(1)
+    elif l2i[0] == 0:
+        print('Distance out of range')
+        time.sleep(1)
+    else:
+        print('Distance not 1m')
+        time.sleep(1)
 
 
 def servo_setup(servo_pin): #set up servo motor
@@ -74,10 +69,9 @@ try:
     solenoid_setup(solenoid_pin)
     while True: 
         action()
-except rospy.ROSInterruptException:
-    p.stop()
-    GPIO.cleanup()
 except KeyboardInterrupt:
+    lidar.StopScanning()
+    lidar.Disconnect()
     p.stop()
     GPIO.cleanup()
 
