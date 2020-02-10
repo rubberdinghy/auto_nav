@@ -16,6 +16,7 @@ servo_pin = 21
 solenoid_pin = 22
 laser_range = np.array([])
 
+
 def get_laserscan(msg):
     global laser_range
 
@@ -30,14 +31,17 @@ def action():
     rospy.Subscriber('scan', LaserScan, get_laserscan)
     
     rate = rospy.Rate(5) # 5 Hz
+    lr2 = laser_range[0]
+
+    if lr2 != 0:
+        rospy.loginfo(['Distance in front is ' + str(lr2)])
     
-    rospy.loginfo(['Distance in front is ' + str(laser_range[0])])
-    
-    if laser_range[0] == 1:
-        rotation(45)
-        solenoid_punch(1)
-        time.sleep(1)
+        if laser_range[0] == 1:
+            rotation(45)
+            solenoid_punch(1)
+            time.sleep(1)
     else: 
+        rospy.loginfo(['Distance out of range!'])
         rate.sleep()
 
 
