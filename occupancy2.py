@@ -33,6 +33,10 @@ def callback(msg, tfBuffer):
     trans = tfBuffer.lookup_transform('base_link', 'map', rospy.Time(0))
     rospy.loginfo(['Trans: ' + str(trans.transform.translation)])
     rospy.loginfo(['Rot: ' + str(trans.transform.rotation)])
+    rospy.loginfo(['X_Coordinate: ' + str(((trans.transform.translation.x - msg.info.origin.position.x)/msg.info.resolution))])
+    rospy.loginfo(['Y_Coordinate: ' + str(((trans.transform.translation.y - msg.info.origin.position.y)/msg.info.resolution))])
+    grid_x = (trans.transform.translation.x - msg.info.origin.position.x)/msg.info.resolution
+    grid_y = (trans.transform.translation.y - msg.info.origin.position.y)/msg.info.resolution
     # convert quaternion to Euler angles
     orientation_list = [trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z, trans.transform.rotation.w]
     (roll, pitch, yaw) = euler_from_quaternion(orientation_list)
@@ -43,13 +47,19 @@ def callback(msg, tfBuffer):
     # set all values above 1 (i.e. above 0 in the original map data, representing occupied locations)
     oc3 = (oc2>1).choose(oc2,2)
     # reshape to 2D array using column order
-    odata = np.uint8(oc3.reshape(msg.info.width,msg.info.height,order='F'))
+    odata = np.uint8(oc3.reshape(msg.info.width,msg.info.height,order='F')) 
+    odata[grid_x][grid_y] = 0
     # create image from 2D array using PIL
     img = Image.fromarray(odata)
+
     # rotate by 180 degrees to invert map so that the forward direction is at the top of the image
     rotated = img.rotate(np.degrees(yaw)+180)
+    img2 = rotated.transform(img.size, Image.AFFINE, (1,0, (img.width)/2 - grid_y,
+                                                     0,1, (img.height)/2 - grid_x))
+    
+    
     # show image using grayscale map
-    plt.imshow(rotated,cmap='gray')
+    plt.imshow(img2,cmap='gray')
     plt.draw_all()
     # pause to make sure the plot gets created
     plt.pause(0.00000000001)

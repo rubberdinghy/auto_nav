@@ -14,33 +14,31 @@ import time
 
 servo_pin = 21
 solenoid_pin = 22
+laser_range = np.array([])
 
-def callback(msg):
+def get_laserscan(msg):
+    global laser_range
+
     # create numpy array
-	laser_range = np.array([msg.ranges])
-    #get wanted distance 
-    distance = laser_range[0]
-	#log info 
-        rospy.loginfo ("Distance at 0 degree is %i", distance)
+    laser_range = np.array([msg.ranges])
+
+def action():
+    global laser_range 
+    #start a node 
+    rospy.init_node('action', anonymous = True)
+    # subcribe to LaserScan Data 
+    rospy.Subscriber('scan', LaserScan, get_laserscan)
     
-    return distance 
-
-def scanner():
-	# initialize node
-	rospy.init_node('scanner', anonymous=True)
-
-	# set the update rate to 1 Hz
-	rate = rospy.Rate(1) # 1 Hz
-
-	# subscribe to LaserScan data
-	rospy.Subscriber('scan', LaserScan, callback)
+    rate = rospy.Rate(5) # 5 Hz
     
-	# wait until it is time to run again
-	rate.sleep()
-
-	# spin() simply keeps python from exiting until this node is stopped
-	rospy.spin()
-    return callback(msg)
+    rospy.loginfo(['Distance in front is ' + str(laser_range[0])])
+    
+    if laser_range[0] == 1:
+        rotation(45)
+        solenoid_punch(1)
+        time.sleep(1)
+    else: 
+        rate.sleep()
 
 
 def servo_setup(servo_pin): #set up servo motor
@@ -71,14 +69,7 @@ try:
     servo_setup(servo_pin)
     solenoid_setup(solenoid_pin)
     while True: 
-        #if scanner() == 1:
-        rotation(45)
-        solenoid_punch(1)
-        rotation(0)
-        time.sleep(1)
-        #scanner()
-        #else:
-        #    continue 
+        action()
 except rospy.ROSInterruptException:
     p.stop()
     GPIO.cleanup()
