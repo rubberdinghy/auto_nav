@@ -7,7 +7,7 @@ from sensor_msgs.msg import LaserScan
 
 def callback(msg):
 	# create numpy array
-	laser_range = np.array([msg.ranges])
+	laser_range = np.array(msg.ranges)
 	# replace 0's with nan
 	lr2 = laser_range
 	lr2[lr2==0] = np.nan
