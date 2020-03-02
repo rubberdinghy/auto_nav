@@ -9,13 +9,12 @@ def callback(msg):
 	# create numpy array
 	laser_range = np.array(msg.ranges)
 	# replace 0's with nan
-	lr2 = laser_range
-	lr2[lr2==0] = np.nan
+	laser_range[laser_range==0] = np.nan
 	# find index with minimum value
-	lr2i = np.nanargmin(lr2)
+	lr2i = np.nanargmin(laser_range)
 
 	# log the info
-    	rospy.loginfo('Shortest distance at %i degrees', lr2i)
+        rospy.loginfo('Shortest distance at %i degrees', lr2i)
 
 
 def scanner():
