@@ -16,7 +16,7 @@ occdata = []
 yaw = 0.0
 rotate_speed = 0.1
 linear_speed = 0.1
-stop_distance = 0.5
+stop_distance = 0.25
 occ_bins = [-1, 0, 100, 101]
 front_angle = 30
 front_angles = range(-front_angle,front_angle+1,1)
@@ -35,7 +35,10 @@ def get_laserscan(msg):
 
     # create numpy array
     laser_range = np.array(msg.ranges)
-    laser_range[laser_range<msg.range_min] = 0
+    # replace 0's with nan's
+    # could have replaced all values below msg.range_min, but the small values
+    # that are not zero appear to be useful
+    laser_range[laser_range==0] = np.nan
 
 
 def get_occupancy(msg):
@@ -124,11 +127,12 @@ def pick_direction():
     pub.publish(twist)
 
     if laser_range.size != 0:
-        lr2i = np.argmax(laser_range)
+        # use nanargmax as there are nan's in laser_range added to replace 0's
+        lr2i = np.nanargmax(laser_range)
     else:
         lr2i = 0
 
-    rospy.loginfo(['Picked direction: ' + str(lr2i)])
+    rospy.loginfo(['Picked direction: ' + str(lr2i) + ' ' + str(laser_range[lr2i]) + ' m'])
 
     # rotate to that direction
     rotatebot(float(lr2i))
@@ -176,18 +180,15 @@ def mover():
 
     while not rospy.is_shutdown():
         if laser_range.size != 0:
-            # check distances in front of TurtleBot
-            lr2 = laser_range[front_angles]
-            # distances beyond the resolution of the Lidar are returned
-            # as zero, so we need to exclude those values
-            lr20 = (lr2!=0).nonzero()
-            # find values less than stop_distance
-            lr2i = (lr2[lr20]<float(stop_distance)).nonzero()
+            # check distances in front of TurtleBot and find values less 
+            # than stop_distance
+            lri = (laser_range[front_angles]<float(stop_distance)).nonzero()
+            rospy.loginfo('Distances: %s', str(lri))
         else:
-            lr2i[0] = []
+            lri[0] = []
 
         # if the list is not empty
-        if(len(lr2i[0])>0):
+        if(len(lri[0])>0):
             rospy.loginfo(['Stop!'])
             # find direction with the largest distance from the Lidar
             # rotate to that direction
