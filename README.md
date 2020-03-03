@@ -1,5 +1,10 @@
-# The Turtle-Bot Project for EG2310 Group 5 AY1920
+# The Turtle-Bot Project for EG2310  - Group 5 AY1920
 This is a student project utilising the Robot Operating Syestem (ROS) on a turtlebot-burger. The code is written in python and is run in a Raspberry Pi 3 Model B+.
+- Nguyen Dung
+- Juin Hwaye Mong
+- Ivander Jonathan
+- Luo Yikai
+- Keng Wei
 
 ## Goals of the Project
 - Navigate and Map and unknown area no larger than 8mx8m
