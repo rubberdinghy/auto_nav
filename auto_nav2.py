@@ -202,4 +202,4 @@ if __name__ == '__main__':
     try:
         mover()
     except rospy.ROSInterruptException:
-        pass
+        pas
