@@ -11,6 +11,8 @@ import cmath
 import numpy as np
 import time
 import cv2
+from sound_play.msg import SoundRequest
+from sound_play.libsoundplay import SoundClient
 
 laser_range = np.array([])
 occdata = np.array([])
@@ -166,11 +168,11 @@ def stopbot():
 
 def closure(mapdata):
     # This function checks if mapdata contains a closed contour. The function
-    # assumes that the raw map data from SLAM has been modified so that 
+    # assumes that the raw map data from SLAM has been modified so that
     # -1 (unmapped) is now 0, and 0 (unoccupied) is now 1, and the occupied
     # values go from 1 to 101.
-    
-	# According to: https://stackoverflow.com/questions/17479606/detect-closed-contours?rq=1
+
+    # According to: https://stackoverflow.com/questions/17479606/detect-closed-contours?rq=1
     # closed contours have larger areas than arc length, while open contours have larger
     # arc length than area. But in my experience, open contours can have areas larger than
     # the arc length, but closed contours tend to have areas much larger than the arc length
@@ -180,14 +182,14 @@ def closure(mapdata):
     ALTHRESH = 10
     # We will slightly fill in the contours to make them easier to detect
     DILATE_PIXELS = 3
-    
-    # assumes mapdata is uint8 and consists of 0 (unmapped), 1 (unoccupied), 
+
+    # assumes mapdata is uint8 and consists of 0 (unmapped), 1 (unoccupied),
     # and other positive values up to 101 (occupied)
     # so we will apply a threshold of 2 to create a binary image with the
     # occupied pixels set to 255 and everything else is set to 0
     # we will use OpenCV's threshold function for this
     ret,img2 = cv2.threshold(mapdata,2,255,0)
-    # we will perform some erosion and dilation to fill out the contours a 
+    # we will perform some erosion and dilation to fill out the contours a
     # little bit
     element = cv2.getStructuringElement(cv2.MORPH_CROSS,(DILATE_PIXELS,DILATE_PIXELS))
     # img3 = cv2.erode(img2,element)
@@ -230,10 +232,10 @@ def mover():
 
     rate = rospy.Rate(5) # 5 Hz
 
-	# save start time to file
-	start_time = time.time()
-	# initialize variable to write elapsed time to file
-	timeWritten = 0
+    # save start time to file
+    start_time = time.time()
+    # initialize variable to write elapsed time to file
+    timeWritten = 0
 
     # find direction with the largest distance from the Lidar,
     # rotate to that direction, and start moving
@@ -241,7 +243,7 @@ def mover():
 
     while not rospy.is_shutdown():
         if laser_range.size != 0:
-            # check distances in front of TurtleBot and find values less 
+            # check distances in front of TurtleBot and find values less
             # than stop_distance
             lri = (laser_range[front_angles]<float(stop_distance)).nonzero()
             rospy.loginfo('Distances: %s', str(lri))
@@ -256,14 +258,22 @@ def mover():
             # start moving
             pick_direction()
 
-		# check if SLAM map is complete
-		if timeWritten :
-			if closure(occdata) :
-				# map is complete, so save current time into file
-				with open("maptime.txt", "w") as f:
-				f.write("Elapsed Time: " + str(time.time() - start_time))
-				timeWritten = 1
-			
+        # check if SLAM map is complete
+        if timeWritten :
+            if closure(occdata) :
+                # map is complete, so save current time into file
+                with open("maptime.txt", "w") as f:
+                    f.write("Elapsed Time: " + str(time.time() - start_time))
+                timeWritten = 1
+                # play a sound
+                soundhandle = SoundClient()
+                rospy.sleep(1)
+                soundhandle.stopAll()
+                soundhandle.play(SoundRequest.NEEDS_UNPLUGGING)
+                rospy.sleep(2)
+                # save the map
+                cv2.imwrite('mazemap.png',occdata)
+
         rate.sleep()
 
 
