@@ -196,9 +196,14 @@ def closure(mapdata):
     img4 = cv2.dilate(img2,element)
     # use OpenCV's findContours function to identify contours
     fc = cv2.findContours(img4, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    contours = fc[0]
+    (major, minor, _) = cv2.__version__.split(".")
+    if(major == '3'):
+        contours = fc[1]
+    else:
+        contours = fc[0]
     # find number of contours returned
     lc = len(contours)
+    # rospy.loginfo('# Contours: %s', str(lc))
     # create array to compute ratio of area to arc length
     cAL = np.zeros((lc,2))
     for i in range(lc):
@@ -209,7 +214,7 @@ def closure(mapdata):
     # so if there are no contours with high ratios, we can safely say
     # there are no closed contours
     cALratio = cAL[:,0]/cAL[:,1]
-    # print(cALratio)
+    # rospy.loginfo('Closure: %s', str(cALratio))
     if np.any(cALratio > ALTHRESH):
         return True
     else:
@@ -232,10 +237,10 @@ def mover():
 
     rate = rospy.Rate(5) # 5 Hz
 
-    # save start time to file
+    # save start time
     start_time = time.time()
     # initialize variable to write elapsed time to file
-    timeWritten = 0
+    contourCheck = 1
 
     # find direction with the largest distance from the Lidar,
     # rotate to that direction, and start moving
@@ -259,12 +264,12 @@ def mover():
             pick_direction()
 
         # check if SLAM map is complete
-        if timeWritten :
+        if contourCheck :
             if closure(occdata) :
                 # map is complete, so save current time into file
                 with open("maptime.txt", "w") as f:
                     f.write("Elapsed Time: " + str(time.time() - start_time))
-                timeWritten = 1
+                contourCheck = 0
                 # play a sound
                 soundhandle = SoundClient()
                 rospy.sleep(1)
