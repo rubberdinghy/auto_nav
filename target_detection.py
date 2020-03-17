@@ -18,6 +18,12 @@ while(1):
 # This creates a mask of blue coloured  
 # objects found in the frame. 
 mask = cv2.inRange(hsv, lower_red, upper_red) 
+
+##ADDITION: count non-zero pixels
+while(1):
+    mask_target = cv2.countNonZero (mask)
+    if mask_target > 50: #set treshold
+        return True  
   
 # The bitwise and of the frame and mask is done so  
 # that only the blue coloured objects are highlighted  
