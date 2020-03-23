@@ -54,10 +54,13 @@ occdata = np.array([])
 yaw = 0.0
 rotate_speed = 0.3
 linear_speed = 0.1
-stop_distance = 1
+stop_distance = .5
 occ_bins = [-1, 0, 100, 101]
-front_angle = 30
+front_angle = 15
 front_angles = range(-front_angle,front_angle+1,1)
+
+JUMP_WIDTH = 2
+MAP_RES = 0.05 # Meters per occupancy pixel.
 
 def callback(msg, tfBuffer):
     global rotated
@@ -255,6 +258,10 @@ def rotatebot(rot_angle):
 def pick_direction(): # NEED TO MODIFY THIS #
     global laser_range
     global rotated
+    global front_angles
+    
+    global JUMP_WIDTH
+    global MAP_RES
     
     rospy.loginfo(['[PICKDIRECTION] '+'Picking direction...'])
     
@@ -275,6 +282,7 @@ def pick_direction(): # NEED TO MODIFY THIS #
     found = False
     blocked_angle = False
     angle = 0.0
+    s = 0.0
     current = int(0)
     
     plt.imshow(rotated)
@@ -285,56 +293,29 @@ def pick_direction(): # NEED TO MODIFY THIS #
     
     time.sleep(1)
     
-    # Check every 30 degrees.
-    for i in range(0, 360, 30):
-        # Initialize the line parameter
-        s = 0
-        rospy.loginfo(['[PICKDIRECTION] ' + 'Checking for angle at ' + str(i) + ' degrees'])
-        
-        
-        
-        
-        # Using polar coordinates to index numpy array
-        x_val = rotated_size/2 + s * int(math.sin(math.radians(i)))
-        y_val = rotated_size/2 + s * int(math.cos(math.radians(i)))
-        current = radar_map[y_val][x_val]
-        
-        for j in range (0, 100):
-            
-            sys.stdout.write(str(j) + ':' + str(current) + ' ')
-            
-            if (current == 2):
-                blocked_angle = True
-                break
-            
-            
-            if (current == 0):
-                angle = i
-                found = True
-                break
-            
-            # Using polar coordinates to index numpy array
-            x_val = rotated_size/2 + s * int(math.sin(math.radians(i)))
-            y_val = rotated_size/2 + s * int(math.cos(math.radians(i)))
-            current = radar_map[y_val][x_val]
-            s = s + 1
-        
-        print('')
-        
-        if (blocked_angle):
-            blocked_angle = False
-            continue
-        
-        if (found):
+    # Checks for large jumps in lidar data
+    for i in range(0, 360 - 2, 1):
+        if (laser_range[i+1] - laser_range[i] > JUMP_WIDTH):
+            angle = i + 15
+            rospy.loginfo(['[PICKDIRECTION] ' + '(1) A Jump! [i]: ' + str(laser_range[i]) + ' and [i+1]: ' + str(laser_range[i+1]) ])
             break
+        elif (laser_range[i+1] - laser_range[i] < -1 * JUMP_WIDTH):
+            angle = i - 15
+            rospy.loginfo(['[PICKDIRECTION] ' + '(2) A Jump! [i]: ' + str(laser_range[i]) + ' and [i+1]: ' + str(laser_range[i+1]) ])
+            break
+    
+#    # check distances in front of TurtleBot and find values less
+#    # than stop_distance
+#    front_angles_to_be = [x+angle for x in front_angles]
+#    lr3i = (laser_range[front_angles_to_be]<float(stop_distance)).nonzero()
+#    
+#    while (len(lr3i[0])>0):
+#        angle += 1
+#        front_angles_to_be = [x+angle for x in front_angles]
+#        lr3i = (laser_range[front_angles_to_be]<float(stop_distance)).nonzero()
         
-        rate.sleep()
     
-    
-    if (found):
-        rospy.loginfo(['[PICKDIRECTION] '+'Picked direction: ' + str(angle) + ' ' + str(laser_range[angle]) + ' m'])
-    else:
-        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found'])
+    rospy.loginfo(['[PICKDIRECTION] ' + 'Picking in degrees: ' + str(angle)])
 
     # rotate to that direction
     rotatebot(float(angle))

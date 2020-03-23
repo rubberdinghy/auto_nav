@@ -9,8 +9,8 @@ import cmath
 import numpy as np
 
 # constants
-rotate_speed = 0.1
-linear_speed = 0.1
+rotate_speed = 1
+linear_speed = 0.2
 
 # global variables
 yaw = 0.0
@@ -37,12 +37,12 @@ def get_rotation(msg):
 def rotatebot(rot_angle):
 	# use global variable yaw
     global yaw
-    # create Twist object
+    # create Twist object [Vec3 linear (x,y,z) | Vec3 angular (x,y,z)]
     twist = Twist()
     # set up Publisher to cmd_vel topic
     pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
-    # set the update rate to 1 Hz
-    rate = rospy.Rate(1)
+    # set the update rate to 20 Hz -- Medium Speed
+    rate = rospy.Rate(20)
 
     # get current yaw angle
     current_yaw = yaw
@@ -69,19 +69,40 @@ def rotatebot(rot_angle):
 
     # we will use the c_dir_diff variable to see if we can stop rotating
     c_dir_diff = c_change_dir
-    rospy.loginfo(['c_change_dir: ' + str(c_change_dir) + ' c_dir_diff: ' + str(c_dir_diff)])
-    # if the rotation direction was 1.0, then we will want to stop when the c_dir_diff
-    # becomes -1.0, and vice versa
-    while(c_change_dir * c_dir_diff > 0):
-        # get the current yaw in complex form
+    # angle difference
+    angle_diff = np.angle(c_change, deg = True)
+    
+    rospy.loginfo(['c_change_dir: ' + str(c_change_dir) + ' c_dir_diff: ' + str(c_dir_diff) + ' angle_diff: ' + str(angle_diff)])
+    
+    
+    
+    # CHECK FOR END ROTATION
+    # if the difference between target yaw and current yaw is less than 3 degrees, stop.
+    while (np.abs(angle_diff) > 3):
+        # we are going to use complex numbers to avoid problems when the angles go from
+        # 360 to 0, or from -180 to 180
         c_yaw = complex(math.cos(yaw),math.sin(yaw))
         rospy.loginfo(['While Yaw: ' + str(math.degrees(yaw))])
-        # get difference in angle between current and target
-        c_change = c_target_yaw / c_yaw
-        # get the sign to see if we can stop
-        c_dir_diff = np.sign(c_change.imag)
-        rospy.loginfo(['c_change_dir: ' + str(c_change_dir) + ' c_dir_diff: ' + str(c_dir_diff)])
+        # get the difference in angle between current and target
+        c_change = c_target_yaw/c_yaw
+        # take the difference in angle value
+        angle_diff = np.angle(c_change, deg = True)
+        rospy.loginfo(['c_change_dir: ' + str(c_change_dir) + 'c_change ' + str(c_change) + ' angle_diff: ' + str(angle_diff)])
         rate.sleep()
+    
+#    # CHECK FOR END ROTATION (OLD)
+#    # if the rotation direction was 1.0, then we will want to stop when the c_dir_diff
+#    # becomes -1.0, and vice versa
+#    while(c_change_dir * c_dir_diff > 0):
+#        # get the current yaw in complex form
+#        c_yaw = complex(math.cos(yaw),math.sin(yaw))
+#        rospy.loginfo(['While Yaw: ' + str(math.degrees(yaw))])
+#        # get difference in angle between current and target
+#        c_change = c_target_yaw / c_yaw
+#        # get the sign to see if we can stop
+#        c_dir_diff = np.sign(c_change.imag)
+#        rospy.loginfo(['c_change_dir: ' + str(c_change_dir) + ' c_dir_diff: ' + str(c_dir_diff)])
+#        rate.sleep()
 
     rospy.loginfo(['End Yaw: ' + str(math.degrees(yaw))])
     # set the rotation speed to 0
@@ -96,7 +117,7 @@ def mover():
     pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
     rospy.init_node('mover', anonymous=True)
     rospy.Subscriber('odom', Odometry, get_rotation)
-    rate = rospy.Rate(1) # 1 Hz
+    rate = rospy.Rate(20) # 20 Hz
 
     while not rospy.is_shutdown():
         cmd_char = str(raw_input("Keys w/x -/+int s: "))
