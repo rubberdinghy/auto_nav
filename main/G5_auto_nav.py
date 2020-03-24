@@ -87,7 +87,7 @@ def callback(msg, tfBuffer):
     # get map grid positions for x, y position
     grid_x = round((cur_pos.x - map_origin.x) / map_res)
     grid_y = round(((cur_pos.y - map_origin.y) / map_res))
-    rospy.loginfo(['Grid Y: ' + str(grid_y) + ' Grid X: ' + str(grid_x)])
+#    rospy.loginfo(['Grid Y: ' + str(grid_y) + ' Grid X: ' + str(grid_x)])
 
     # make occdata go from 0 instead of -1, reshape into 2D
     oc2 = occdata + 1
@@ -120,7 +120,7 @@ def callback(msg, tfBuffer):
     # convert quaternion to Euler angles
     orientation_list = [cur_rot.x, cur_rot.y, cur_rot.z, cur_rot.w]
     (roll, pitch, yaw) = euler_from_quaternion(orientation_list)
-    rospy.loginfo(['Yaw: R: ' + str(yaw) + ' D: ' + str(np.degrees(yaw))])
+#    rospy.loginfo(['Yaw: R: ' + str(yaw) + ' D: ' + str(np.degrees(yaw))])
 
     # rotate by 180 degrees to invert map so that the forward direction is at the top of the image
     rotated = img_transformed.rotate(np.degrees(-yaw)+180)
@@ -286,17 +286,17 @@ def pick_direction(): # NEED TO MODIFY THIS #
     time.sleep(1)
     
     # Check every 30 degrees.
-    for i in range(0, 360, 30):
+    for i in range(0, 360, 1):
         # Initialize the line parameter
-        s = 0
+        s = 0.5
         rospy.loginfo(['[PICKDIRECTION] ' + 'Checking for angle at ' + str(i) + ' degrees'])
         
         
         
         
         # Using polar coordinates to index numpy array
-        x_val = rotated_size/2 + s * int(math.sin(math.radians(i)))
-        y_val = rotated_size/2 + s * int(math.cos(math.radians(i)))
+        x_val = rotated_size/2 + int(s * math.sin(math.radians(i)))
+        y_val = rotated_size/2 + int(s * math.cos(math.radians(i)))
         current = radar_map[y_val][x_val]
         
         for j in range (0, 100):
@@ -308,16 +308,16 @@ def pick_direction(): # NEED TO MODIFY THIS #
                 break
             
             
-            if (current == 0):
-                angle = i
-                found = True
-                break
+#            if (current == 1):
+#                angle = i
+#                found = True
+#                break
             
             # Using polar coordinates to index numpy array
-            x_val = rotated_size/2 + s * int(math.sin(math.radians(i)))
-            y_val = rotated_size/2 + s * int(math.cos(math.radians(i)))
+            x_val = rotated_size/2 + int(s * math.sin(math.radians(i)))
+            y_val = rotated_size/2 + int(s * math.cos(math.radians(i)))
             current = radar_map[y_val][x_val]
-            s = s + 1
+            s = s + 0.5
         
         print('')
         
@@ -389,6 +389,9 @@ def closure(mapdata):
     # img3 = cv2.erode(img2,element)
     img4 = cv2.dilate(img2,element)
     # use OpenCV's findContours function to identify contours
+    # OpenCV version 3 changed the number of return arguments, so we
+    # need to check the version of OpenCV installed so we know which argument
+    # to grab
     fc = cv2.findContours(img4, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     (major, minor, _) = cv2.__version__.split(".")
     if(major == '3'):
@@ -425,7 +428,7 @@ def mover():
     # subscribe to LaserScan data
     rospy.Subscriber('scan', LaserScan, get_laserscan)
     # subscribe to map occupancy data
-#    rospy.Subscriber('map', OccupancyGrid, get_occupancy)
+    rospy.Subscriber('map', OccupancyGrid, get_occupancy)
 
     rospy.on_shutdown(stopbot)
 
@@ -466,21 +469,21 @@ def mover():
             # start moving
             pick_direction()
 
-        # check if SLAM map is complete
-#        if contourCheck :
-#            if closure(occdata) :
-#                # map is complete, so save current time into file
-#                with open("maptime.txt", "w") as f:
-#                    f.write("Elapsed Time: " + str(time.time() - start_time))
-#                contourCheck = 0
-#                # play a sound
-#                soundhandle = SoundClient()
-#                rospy.sleep(1)
-#                soundhandle.stopAll()
-#                soundhandle.play(SoundRequest.NEEDS_UNPLUGGING)
-#                rospy.sleep(2)
-#                # save the map
-#                cv2.imwrite('mazemap.png',occdata)
+        #check if SLAM map is complete
+        if contourCheck :
+            if closure(occdata) :
+                # map is complete, so save current time into file
+                with open("maptime.txt", "w") as f:
+                    f.write("Elapsed Time: " + str(time.time() - start_time))
+                contourCheck = 0
+                # play a sound
+                soundhandle = SoundClient()
+                rospy.sleep(1)
+                soundhandle.stopAll()
+                soundhandle.play(SoundRequest.NEEDS_UNPLUGGING)
+                rospy.sleep(2)
+                # save the map
+                cv2.imwrite('mazemap.png',occdata)
 
         rate.sleep()
 
