@@ -54,9 +54,9 @@ occdata = np.array([])
 yaw = 0.0
 rotate_speed = 0.3
 linear_speed = 0.1
-stop_distance = 1
+stop_distance = 0.7
 occ_bins = [-1, 0, 100, 101]
-front_angle = 30
+front_angle = 25
 front_angles = range(-front_angle,front_angle+1,1)
 
 def callback(msg, tfBuffer):
@@ -288,10 +288,9 @@ def pick_direction(): # NEED TO MODIFY THIS #
     # Check every 30 degrees.
     for i in range(0, 360, 1):
         # Initialize the line parameter
-        s = 0.5
         rospy.loginfo(['[PICKDIRECTION] ' + 'Checking for angle at ' + str(i) + ' degrees'])
         
-        
+        s = 6.5
         
         
         # Using polar coordinates to index numpy array
@@ -299,25 +298,24 @@ def pick_direction(): # NEED TO MODIFY THIS #
         y_val = rotated_size/2 + int(s * math.cos(math.radians(i)))
         current = radar_map[y_val][x_val]
         
-        for j in range (0, 100):
+        for s in range (7, 100, 1):
             
-            sys.stdout.write(str(j) + ':' + str(current) + ' ')
+            sys.stdout.write(str(current))
             
             if (current == 2):
                 blocked_angle = True
                 break
             
             
-#            if (current == 1):
-#                angle = i
-#                found = True
-#                break
+            if (current == 0):
+                angle = i
+                found = True
+                break
             
             # Using polar coordinates to index numpy array
-            x_val = rotated_size/2 + int(s * math.sin(math.radians(i)))
-            y_val = rotated_size/2 + int(s * math.cos(math.radians(i)))
+            x_val = rotated_size/2 + int(s * math.sin(math.radians(i))/2)
+            y_val = rotated_size/2 + int(s * math.cos(math.radians(i))/2)
             current = radar_map[y_val][x_val]
-            s = s + 0.5
         
         print('')
         
