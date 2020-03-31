@@ -277,8 +277,8 @@ def pick_direction(): # NEED TO MODIFY THIS #
     angle = 0.0
     current = int(0)
     
-    plt.imshow(rotated)
-    plt.pause(1)
+#    plt.imshow(rotated)
+#    plt.pause(1)
     
     # Convert rotated map back to numpy array
     radar_map = np.asarray(rotated)
@@ -297,6 +297,8 @@ def pick_direction(): # NEED TO MODIFY THIS #
         x_val = rotated_size/2 + int(s * math.sin(math.radians(i)))
         y_val = rotated_size/2 + int(s * math.cos(math.radians(i)))
         current = radar_map[y_val][x_val]
+        
+        radar_map[y_val][x_val] = 3
         
         for s in range (7, 100, 1):
             
@@ -328,6 +330,10 @@ def pick_direction(): # NEED TO MODIFY THIS #
         
         rate.sleep()
     
+     # create image from 2D array using PIL
+    img = Image.fromarray(radar_map.astype(np.uint8))
+    plt.imshow(img)
+    plt.pause(1)
     
     if (found):
         rospy.loginfo(['[PICKDIRECTION] '+'Picked direction: ' + str(angle) + ' ' + str(laser_range[angle]) + ' m'])
