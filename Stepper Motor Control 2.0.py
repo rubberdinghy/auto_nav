@@ -9,7 +9,6 @@ Created on Tue Mar 31 17:20:58 2020
 from time import sleep 
 import RPi.GPIO as GPIO  
 
-GPIO.setmode(GPIO.BOARD)
 
 class Stepper_Motor(object):
     def __init__(self,pins):
@@ -79,7 +78,8 @@ class Stepper_Motor(object):
         GPIO.output(self.IN4, False)
         GPIO.output(self.IN1, False)
         
-    def left(self, step):
+    def left(self,angle):
+        step = int((angle/360)*512)
         for i in range (step):    
             Step1(self)
             Step2(self)
@@ -91,7 +91,8 @@ class Stepper_Motor(object):
             Step8(self)  
             
     
-    def right(self,step):
+    def right(self,angle):
+        step = int((angle/360)*512)
         for i in range (step):    
             Step8(self)
             Step7(self)
@@ -101,3 +102,12 @@ class Stepper_Motor(object):
             Step3(self)
             Step2(self)
             Step1(self)
+
+if 1 == 1:
+    GPIO.setmode(GPIO.BOARD)
+    m = Stepper_Motor([15,16,17,18])
+    m.right(90)
+    sleep(1)
+    m.left(270)
+    sleep(1)
+    GPIO.cleanup()
