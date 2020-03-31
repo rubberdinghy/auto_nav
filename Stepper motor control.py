@@ -145,4 +145,3 @@ try:
         sleep(1)
         m.move_to(0)
         GPIO.cleanup()
-        
