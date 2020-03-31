@@ -15,8 +15,13 @@ laser_range = np.array([])
 occdata = []
 yaw = 0.0
 rotate_speed = 0.1
+<<<<<<< Updated upstream
 linear_speed = 0.1
 stop_distance = 0.5
+=======
+linear_speed = 0.05
+stop_distance = 0.40
+>>>>>>> Stashed changes
 occ_bins = [-1, 0, 100, 101]
 front_angle = 30
 front_angles = range(-front_angle,front_angle+1,1)
@@ -130,7 +135,7 @@ def pick_direction():
     rospy.loginfo(['Picked direction: ' + str(lr2i)])
 
     # rotate to that direction
-    rotatebot(float(lr2i))
+    rotatebot(float(lr2i)*0.5)
 
     # start moving
     rospy.loginfo(['Start moving'])

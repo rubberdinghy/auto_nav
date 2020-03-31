@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 
-# Currently, rotated occupancy has not been integrated to pick_direction().
+# Version 0.2
+# modified by ivanderjmw
+# Calls occupancy in mover()
+# Integrated occupancy has not been integrated to pick_direction().
+# Shows image of occupancy map whenever pick_direction() is called
+# Commented some loginfo to ease debugging
+# Utilised the polar angle to search for unmapped region, but problems were encountered (Keeps selecting angle of 0 degrees)
+# The closure() function was commented out because it gave an error, should ask to Dr Yen.
+
+
+import sys #for print w/o newline
 
 import rospy
 from nav_msgs.msg import Odometry
@@ -32,6 +42,7 @@ occ_bins = [-1, 0, 100, 101]
 
 # create global variables
 rotated = Image.fromarray(np.array(np.zeros((1,1))))
+rotated_size = 384
 
 # /FROM OCCUPANCY_3 #
 
@@ -41,9 +52,9 @@ rotated = Image.fromarray(np.array(np.zeros((1,1))))
 laser_range = np.array([])
 occdata = np.array([])
 yaw = 0.0
-rotate_speed = 0.1
+rotate_speed = 0.3
 linear_speed = 0.1
-stop_distance = 0.25
+stop_distance = 1
 occ_bins = [-1, 0, 100, 101]
 front_angle = 30
 front_angles = range(-front_angle,front_angle+1,1)
@@ -58,16 +69,16 @@ def callback(msg, tfBuffer):
     # calculate total number of bins
     total_bins = msg.info.width * msg.info.height
     # log the info
-    rospy.loginfo('Width: %i Height: %i',msg.info.width,msg.info.height)
-    rospy.loginfo('Unmapped: %i Unoccupied: %i Occupied: %i Total: %i', occ_counts[0][0], occ_counts[0][1], occ_counts[0][2], total_bins)
+#    rospy.loginfo('Width: %i Height: %i',msg.info.width,msg.info.height)
+#    rospy.loginfo('Unmapped: %i Unoccupied: %i Occupied: %i Total: %i', occ_counts[0][0], occ_counts[0][1], occ_counts[0][2], total_bins)
 
     # find transform to convert map coordinates to base_link coordinates
     # lookup_transform(target_frame, source_frame, time)
     trans = tfBuffer.lookup_transform('map', 'base_link', rospy.Time(0))
     cur_pos = trans.transform.translation
     cur_rot = trans.transform.rotation
-    rospy.loginfo(['Trans: ' + str(cur_pos)])
-    rospy.loginfo(['Rot: ' + str(cur_rot)])
+#    rospy.loginfo(['Trans: ' + str(cur_pos)])
+#    rospy.loginfo(['Rot: ' + str(cur_rot)])
 
     # get map resolution
     map_res = msg.info.resolution
@@ -76,7 +87,7 @@ def callback(msg, tfBuffer):
     # get map grid positions for x, y position
     grid_x = round((cur_pos.x - map_origin.x) / map_res)
     grid_y = round(((cur_pos.y - map_origin.y) / map_res))
-    rospy.loginfo(['Grid Y: ' + str(grid_y) + ' Grid X: ' + str(grid_x)])
+#    rospy.loginfo(['Grid Y: ' + str(grid_y) + ' Grid X: ' + str(grid_x)])
 
     # make occdata go from 0 instead of -1, reshape into 2D
     oc2 = occdata + 1
@@ -109,27 +120,27 @@ def callback(msg, tfBuffer):
     # convert quaternion to Euler angles
     orientation_list = [cur_rot.x, cur_rot.y, cur_rot.z, cur_rot.w]
     (roll, pitch, yaw) = euler_from_quaternion(orientation_list)
-    rospy.loginfo(['Yaw: R: ' + str(yaw) + ' D: ' + str(np.degrees(yaw))])
+#    rospy.loginfo(['Yaw: R: ' + str(yaw) + ' D: ' + str(np.degrees(yaw))])
 
     # rotate by 180 degrees to invert map so that the forward direction is at the top of the image
     rotated = img_transformed.rotate(np.degrees(-yaw)+180)
     # we should now be able to access the map around the robot by converting
     # back to a numpy array: im2arr = np.array(rotated)
-
-
-    # create a publisher for the corrected Occupancy Grid to mod_OccGrid
-    pub = rospy.Publisher('mod_OccGrid', rotated, queue_size=1)
     
-    # show image using grayscale map
-    plt.imshow(rotated,cmap='gray')
-    plt.draw_all()
-    # pause to make sure the plot gets created
-    plt.pause(0.00000000001)
+    
+#    # show image using grayscale map
+#    plt.imshow(rotated,cmap='gray')
+#    plt.draw_all()
+##    # pause to make sure the plot gets created
+##    plt.pause(0.00000000001)
+#    plt.pause(0.0000001)
+    
 
 
 def occupancy():
+    
     # initialize node
-    rospy.init_node('occupancy', anonymous=True)
+#    rospy.init_node('occupancy', anonymous=True)
 
     tfBuffer = tf2_ros.Buffer()
     tfListener = tf2_ros.TransformListener(tfBuffer)
@@ -138,11 +149,11 @@ def occupancy():
     # subscribe to map occupancy data
     rospy.Subscriber('map', OccupancyGrid, callback, tfBuffer)
 
-    plt.ion()
-    plt.show()
+#    plt.ion()
+#    plt.show()
 
     # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
+#    rospy.spin()
 
 
 def get_odom_dir(msg):
@@ -243,27 +254,90 @@ def rotatebot(rot_angle):
 
 def pick_direction(): # NEED TO MODIFY THIS #
     global laser_range
-
+    global rotated
+    
+    rospy.loginfo(['[PICKDIRECTION] '+'Picking direction...'])
+    
+    
     # publish to cmd_vel to move TurtleBot
     pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-
+    rate = rospy.Rate(20) # 20 Hz
+    
     # stop moving
     twist = Twist()
     twist.linear.x = 0.0
     twist.angular.z = 0.0
     time.sleep(1)
     pub.publish(twist)
-
-    if laser_range.size != 0:
-        # use nanargmax as there are nan's in laser_range added to replace 0's
-        lr2i = np.nanargmax(laser_range)
+    
+    
+    # Initialise found and angle
+    found = False
+    blocked_angle = False
+    angle = 0.0
+    current = int(0)
+    
+    plt.imshow(rotated)
+    plt.pause(1)
+    
+    # Convert rotated map back to numpy array
+    radar_map = np.asarray(rotated)
+    
+    time.sleep(1)
+    
+    # Check every 30 degrees.
+    for i in range(0, 360, 1):
+        # Initialize the line parameter
+        s = 0.5
+        rospy.loginfo(['[PICKDIRECTION] ' + 'Checking for angle at ' + str(i) + ' degrees'])
+        
+        
+        
+        
+        # Using polar coordinates to index numpy array
+        x_val = rotated_size/2 + int(s * math.sin(math.radians(i)))
+        y_val = rotated_size/2 + int(s * math.cos(math.radians(i)))
+        current = radar_map[y_val][x_val]
+        
+        for j in range (0, 100):
+            
+            sys.stdout.write(str(j) + ':' + str(current) + ' ')
+            
+            if (current == 2):
+                blocked_angle = True
+                break
+            
+            
+#            if (current == 1):
+#                angle = i
+#                found = True
+#                break
+            
+            # Using polar coordinates to index numpy array
+            x_val = rotated_size/2 + int(s * math.sin(math.radians(i)))
+            y_val = rotated_size/2 + int(s * math.cos(math.radians(i)))
+            current = radar_map[y_val][x_val]
+            s = s + 0.5
+        
+        print('')
+        
+        if (blocked_angle):
+            blocked_angle = False
+            continue
+        
+        if (found):
+            break
+        
+        rate.sleep()
+    
+    
+    if (found):
+        rospy.loginfo(['[PICKDIRECTION] '+'Picked direction: ' + str(angle) + ' ' + str(laser_range[angle]) + ' m'])
     else:
-        lr2i = 0
-
-    rospy.loginfo(['Picked direction: ' + str(lr2i) + ' ' + str(laser_range[lr2i]) + ' m'])
+        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found'])
 
     # rotate to that direction
-    rotatebot(float(lr2i))
+    rotatebot(float(angle))
 
     # start moving
     rospy.loginfo(['Start moving'])
@@ -315,6 +389,9 @@ def closure(mapdata):
     # img3 = cv2.erode(img2,element)
     img4 = cv2.dilate(img2,element)
     # use OpenCV's findContours function to identify contours
+    # OpenCV version 3 changed the number of return arguments, so we
+    # need to check the version of OpenCV installed so we know which argument
+    # to grab
     fc = cv2.findContours(img4, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     (major, minor, _) = cv2.__version__.split(".")
     if(major == '3'):
@@ -362,9 +439,14 @@ def mover():
     # initialize variable to write elapsed time to file
     contourCheck = 1
 
+    # call occupancy
+    occupancy()
+
     # find direction with the largest distance from the Lidar,
     # rotate to that direction, and start moving
     pick_direction()
+    
+    
 
     while not rospy.is_shutdown():
         if laser_range.size != 0:
@@ -378,12 +460,16 @@ def mover():
         # if the list is not empty
         if(len(lri[0])>0):
             rospy.loginfo(['Stop!'])
+            
+            # call occupancy
+            occupancy()
+            
             # find direction with the largest distance from the Lidar
             # rotate to that direction
             # start moving
             pick_direction()
 
-        # check if SLAM map is complete
+        #check if SLAM map is complete
         if contourCheck :
             if closure(occdata) :
                 # map is complete, so save current time into file
