@@ -1,3 +1,11 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Mar 31 20:27:26 2020
+
+@author: tuandung
+"""
+
 from time import sleep
 import RPi.GPIO as GPIO
 
