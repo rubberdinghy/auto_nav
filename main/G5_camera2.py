@@ -15,9 +15,7 @@ from collections import deque
 import argparse
 import imutils
 import sys
-from picamera import PiCamera
-from io import BytesIO
-from time import sleep
+
 
 
 
@@ -34,7 +32,7 @@ def talker():
 	greenUpper = (178, 255, 255)
 	pts = deque(maxlen=64)
 	if not args.get("video", False):
-		camera = PiCamera()
+		camera = cv2.VideoCapture()
 	else:
 		camera = cv2.VideoCapture('args["video"]')
 
