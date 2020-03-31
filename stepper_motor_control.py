@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
 Created on Wed Mar 18 19:48:04 2020
@@ -8,9 +7,13 @@ Created on Wed Mar 18 19:48:04 2020
 
 from time import sleep 
 import RPi.GPIO as GPIO 
+import rospy
 
-class Stepper_Motor(object):
-    def __init__(self, pins, mode=3):
+
+
+
+class Motor(object):
+    def __init__(self, pins, mode=2):
         self.p1 = pins[0]
         self.p2 = pins[1]
         self.p3 = pins[2]
@@ -28,7 +31,7 @@ class Stepper_Motor(object):
         self._rpm = rpm 
         self._T = (60/rpm)/ self.steps_per_rev # amount of time to stop between signal
         
-    rpm = property(lambda self: self.rpm, _set_rpm())
+    rpm = property(lambda self: self.rpm, _set_rpm)
     def move_to(self, angle):
         """take the shortest route to chosen angle"""
         target_steps = int(angle/self.deg_per_step)
@@ -92,48 +95,47 @@ class Stepper_Motor(object):
     def _move_acw_3(self, big_steps):
         self.__clear()
         for i in range(big_steps):
-            GPIO.output(self.P1, 0)
+            GPIO.output(self.p1, 0)
             sleep(self._T)
-            GPIO.output(self.P3, 1)
+            GPIO.output(self.p3, 1)
             sleep(self._T)
-            GPIO.output(self.P4, 0)
+            GPIO.output(self.p4, 0)
             sleep(self._T)
-            GPIO.output(self.P2, 1)
+            GPIO.output(self.p2, 1)
             sleep(self._T)
-            GPIO.output(self.P3, 0)
+            GPIO.output(self.p3, 0)
             sleep(self._T)
-            GPIO.output(self.P1, 1)
+            GPIO.output(self.p1, 1)
             sleep(self._T)
-            GPIO.output(self.P2, 0)
+            GPIO.output(self.p2, 0)
             sleep(self._T)
-            GPIO.output(self.P4, 1)
+            GPIO.output(self.p4, 1)
             sleep(self._T)
 
     def _move_cw_3(self, big_steps):
         self.__clear()
         for i in range(big_steps):
-            GPIO.output(self.P3, 0)
+            GPIO.output(self.p3, 0)
             sleep(self._T)
-            GPIO.output(self.P1, 1)
+            GPIO.output(self.p1, 1)
             sleep(self._T)
-            GPIO.output(self.P4, 0)
+            GPIO.output(self.p4, 0)
             sleep(self._T)
-            GPIO.output(self.P2, 1)
+            GPIO.output(self.p2, 1)
             sleep(self._T)
-            GPIO.output(self.P1, 0)
+            GPIO.output(self.p1, 0)
             sleep(self._T)
-            GPIO.output(self.P3, 1)
+            GPIO.output(self.p3, 1)
             sleep(self._T)
-            GPIO.output(self.P2, 0)
+            GPIO.output(self.p2, 0)
             sleep(self._T)
-            GPIO.output(self.P4, 1)
+            GPIO.output(self.p4, 1)
             sleep(self._T)
-        
-        
-try:
-    while True: 
+
+if __name__ == '__main__':
+    try:
         GPIO.setmode(GPIO.BOARD)
-        m = Stepper_Motor([18,22,24,26])
+        m = Motor([37,35,33,31])
         m.rpm = 5
         print ("Pause in seconds: " + str(m._T))
         m.move_to(90)
@@ -145,3 +147,6 @@ try:
         sleep(1)
         m.move_to(0)
         GPIO.cleanup()
+    except rospy.ROSInterruptException:
+        pass
+        
