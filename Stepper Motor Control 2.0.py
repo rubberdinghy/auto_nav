@@ -77,35 +77,38 @@ class Stepper_Motor(object):
         sleep (self.time)
         GPIO.output(self.IN4, False)
         GPIO.output(self.IN1, False)
+    
+    def right(self, angle):
+        step = int ((angle/360)*512)
+        for i in range (step):
+            self.Step8(self)
+            self.Step7(self)
+            self.Step6(self)
+            self.Step5(self)
+            self.Step4(self)
+            self.Step3(self)
+            self.Step2(self)
+            self.Step1(self)
+            print "Step left: " + str(i)
         
     def left(self,angle):
         step = int((angle/360)*512)
         for i in range (step):    
-            Step1(self)
-            Step2(self)
-            Step3(self)
-            Step4(self)
-            Step5(self)
-            Step6(self)
-            Step7(self)
-            Step8(self)  
-            
-    
-    def right(self,angle):
-        step = int((angle/360)*512)
-        for i in range (step):    
-            Step8(self)
-            Step7(self)
-            Step6(self)
-            Step5(self)
-            Step4(self)
-            Step3(self)
-            Step2(self)
-            Step1(self)
+            self.Step1(self)
+            self.Step2(self)
+            self.Step3(self)
+            self.Step4(self)
+            self.Step5(self)
+            self.Step6(self)
+            self.Step7(self)
+            self.Step8(self)  
+            print "Step left: " + str(i)
 
-if 1 == 1:
+
+if __name__ == '__main__':
     GPIO.setmode(GPIO.BOARD)
-    m = Stepper_Motor([15,16,17,18])
+    m = Stepper_Motor([31,33,35,37])
+    m.Motor_setup()
     m.right(90)
     sleep(1)
     m.left(270)
