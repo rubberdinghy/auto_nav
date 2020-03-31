@@ -146,15 +146,3 @@ try:
         m.move_to(0)
         GPIO.cleanup()
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    
