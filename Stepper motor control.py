@@ -9,6 +9,9 @@ Created on Wed Mar 18 19:48:04 2020
 from time import sleep 
 import RPi.GPIO as GPIO 
 
+
+
+
 class Motor(object):
     def __init__(self, pins, mode=3):
         self.p1 = pins[0]
@@ -133,7 +136,7 @@ class Motor(object):
 try:
     while True: 
         GPIO.setmode(GPIO.BOARD)
-        m = Motor([18,22,24,26])
+        m = Motor([6,13,19,26])
         m.rpm = 5
         print ("Pause in seconds: " + str(m._T))
         m.move_to(90)
