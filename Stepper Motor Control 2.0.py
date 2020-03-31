@@ -81,7 +81,7 @@ class Stepper_Motor(object):
     def left(self,angle):
         step = int((angle/360)*512)
         for i in range (step):    
-            Step1(self)
+            Step1()
             Step2(self)
             Step3(self)
             Step4(self)
@@ -89,6 +89,7 @@ class Stepper_Motor(object):
             Step6(self)
             Step7(self)
             Step8(self)  
+            print "Step left: " + str(i)
             
     
     def right(self,angle):
@@ -102,8 +103,9 @@ class Stepper_Motor(object):
             Step3(self)
             Step2(self)
             Step1(self)
+            print "Step left: " + str(i)
 
-if 1 == 1:
+if __name__ == '__main__':
     GPIO.setmode(GPIO.BOARD)
     m = Stepper_Motor([15,16,17,18])
     m.right(90)
