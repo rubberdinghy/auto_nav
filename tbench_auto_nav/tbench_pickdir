@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Apr  1 18:45:56 2020
+
+@author: ivanderjmw
+"""
+
+import math
+import cmath
+import numpy as np
+import time
+import cv2
+
+# create global variables
+rotated = Image.fromarray(np.array(np.zeros((1,1))))
+rotated_size = 384
+
+
+def pick_direction(radar_map): # NEED TO MODIFY THIS #
+    global laser_range
+    global rotated
+    
+    print(['[PICKDIRECTION] '+'Picking direction...'])
+    
+    
+    # Initialise found and angle
+    found = False
+    blocked_angle = False
+    angle = 0.0
+    current = int(0)
+    
+#    plt.imshow(rotated)
+#    plt.pause(1)
+    
+    # Convert rotated map back to numpy array
+    radar_map = np.asarray(rotated)
+    
+    time.sleep(1)
+    
+    # Check every 30 degrees.
+    for i in range(0, 360, 1):
+        # Initialize the line parameter
+        rospy.loginfo(['[PICKDIRECTION] ' + 'Checking for angle at ' + str(i) + ' degrees'])
+        
+        s = 6.5
+        
+        
+        # Using polar coordinates to index numpy array
+        x_val = rotated_size/2 + int(s * math.sin(math.radians(i)))
+        y_val = rotated_size/2 + int(s * math.cos(math.radians(i)))
+        current = radar_map[y_val][x_val]
+        
+        radar_map[y_val][x_val] = 3
+        
+        for s in range (7, 100, 1):
+            
+            sys.stdout.write(str(current))
+            
+            if (current == 2):
+                blocked_angle = True
+                break
+            
+            
+            if (current == 0):
+                angle = i
+                found = True
+                break
+            
+            # Using polar coordinates to index numpy array
+            x_val = rotated_size/2 + int(s * math.sin(math.radians(i))/2)
+            y_val = rotated_size/2 + int(s * math.cos(math.radians(i))/2)
+            current = radar_map[y_val][x_val]
+        
+        print('')
+        
+        if (blocked_angle):
+            blocked_angle = False
+            continue
+        
+        if (found):
+            break
+        
+        rate.sleep()
+    
+     # create image from 2D array using PIL
+    img = Image.fromarray(radar_map.astype(np.uint8))
+    plt.imshow(img)
+    plt.pause(1)
+    
+    if (found):
+        rospy.loginfo(['[PICKDIRECTION] '+'Picked direction: ' + str(angle) + ' ' + str(laser_range[angle]) + ' m'])
+    else:
+        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found'])
+
+    # rotate to that direction
+    rotatebot(float(angle))
+
+    # start moving
+    rospy.loginfo(['Start moving'])
+    twist.linear.x = linear_speed
+    twist.angular.z = 0.0
+    # not sure if this is really necessary, but things seem to work more
+    # reliably with this
+    time.sleep(1)
+    pub.publish(twist)
