@@ -41,6 +41,28 @@ def check_region(x, y, arr):
         return unmap_color
     else: 
         return clear_color
+    
+def check_line(x, y, th, radar_map):
+    
+    
+    for s in range (0, 50, 1):
+        for sign in [-1,1]:
+            # Using polar coordinates to index numpy array
+            x_val = int(x + sign * s * math.sin(math.radians(th)))
+            y_val = int(y + sign * s * math.cos(math.radians(th)))
+            current = check_region(x_val, y_val, radar_map)
+            
+            radar_map[y_val][x_val][0] = 255
+            
+            if (current == wall_color):
+                return wall_color
+            
+            
+            if (current == unmap_color):
+                return unmap_color
+        
+    return clear_color     
+
 
 def pick_direction(n, rotated): # NEED TO MODIFY THIS #
     
@@ -59,13 +81,13 @@ def pick_direction(n, rotated): # NEED TO MODIFY THIS #
 #    plt.imshow(rotated)
 #    plt.pause(1)
     
-    # Convert rotated map back to numpy array
+    # Convert rotated map back to numpy array, this array is editable
     radar_map = np.array(rotated)
     
     time.sleep(1)
     
     # Check every 30 degrees.
-    for i in range(0, 360, 1):
+    for i in range(0, 360, 10):
         # Initialize the line parameter
 #        print(['[PICKDIRECTION] ' + 'Checking for angle at ' + str(i) + ' degrees'])
         
@@ -78,9 +100,14 @@ def pick_direction(n, rotated): # NEED TO MODIFY THIS #
         
         radar_map[y_val][x_val][0] = 255
         
-        for s in range (7, 500, 1):
+        for s in range (7, 250, 1):
+
+            # Using polar coordinates to index numpy array
+            x_val = int(rotated_size/2 + s * math.sin(math.radians(i)))
+            y_val = int(rotated_size/2 + s * math.cos(math.radians(i)))
+            current = check_region(x_val, y_val, radar_map)
             
-#            sys.stdout.write(str(current))
+            radar_map[y_val][x_val][0] = 255
             
             if (current == wall_color):
                 blocked_angle = True
@@ -91,17 +118,14 @@ def pick_direction(n, rotated): # NEED TO MODIFY THIS #
                 angle = i
                 found = True
                 break
-            
-            # Using polar coordinates to index numpy array
-            x_val = int(rotated_size/2 + s * math.sin(math.radians(i))/2)
-            y_val = int(rotated_size/2 + s * math.cos(math.radians(i))/2)
-            current = check_region(x_val, y_val, radar_map)
-            
-            radar_map[y_val][x_val][0] = 255
         
 #        print('')
-        if (abs(s - s_prev) > square_size*5):
-            angle2 = i
+        if (abs(s - s_prev) > square_size*5 and i != 0):
+            x = int(rotated_size/2 + (s+s_prev) * math.sin(math.radians(i)) / 2)
+            y = int(rotated_size/2 + (s+s_prev) * math.cos(math.radians(i)) / 2)
+            if (check_line(x, y, i + 90 if (s > s_prev) else i + 80, radar_map) == unmap_color):
+                angle2 = i if (s > s_prev) else i - 10
+                break
             
         s_prev = s
         
@@ -118,7 +142,7 @@ def pick_direction(n, rotated): # NEED TO MODIFY THIS #
      # create image from 2D array using PIL
     img = Image.fromarray(radar_map)
     plt.imshow(img)
-    plt.pause(1)
+    plt.pause(.05)
     
     if (found):
         print(['[PICKDIRECTION] '+'Picked direction: ' + str(angle) + ' '])
@@ -141,7 +165,7 @@ def pick_direction(n, rotated): # NEED TO MODIFY THIS #
     
 if __name__ == '__main__':
     try:
-        for n in range (1, 5):
+        for n in range (1, 7):
 #            img = Image.open("maps/" + "map" + str(n) + ".png")
             img = Image.open("maps/" + "map" + str(n) + ".png").convert('LA')
             plt.imshow(img)
