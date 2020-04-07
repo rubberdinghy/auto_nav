@@ -59,6 +59,11 @@ occ_bins = [-1, 0, 100, 101]
 front_angle = 25
 front_angles = range(-front_angle,front_angle+1,1)
 
+clear_color = 1
+wall_color = 2
+unmap_color = 0
+square_size = 5
+
 def callback(msg, tfBuffer):
     global rotated
 
@@ -251,6 +256,46 @@ def rotatebot(rot_angle):
     time.sleep(1)
     pub.publish(twist)
 
+def check_region(x, y, arr):
+    blocked = False
+    unmapped = False
+    
+    for n in (-square_size, square_size):
+        for m in (-square_size, square_size):
+            if (arr[y + n][x + m][0] == wall_color):
+                blocked = True
+            if (arr[y + n][x + m][0] == unmap_color):
+                unmapped = True
+    
+    if (blocked):
+        return wall_color
+    elif (unmapped):
+        return unmap_color
+    else: 
+        return clear_color
+    
+def check_line(x, y, th, radar_map):
+    
+    
+    for s in range (0, 50, 1):
+        for sign in [-1,1]:
+            # Using polar coordinates to index numpy array
+            x_val = int(x + sign * s * math.sin(math.radians(th)))
+            y_val = int(y + sign * s * math.cos(math.radians(th)))
+            current = check_region(x_val, y_val, radar_map)
+            
+            radar_map[y_val][x_val][0] = 255
+            
+            if (current == wall_color):
+                return wall_color
+            
+            
+            if (current == unmap_color):
+                return unmap_color
+        
+    return clear_color     
+
+
 
 def pick_direction(): # NEED TO MODIFY THIS #
     global laser_range
@@ -261,7 +306,7 @@ def pick_direction(): # NEED TO MODIFY THIS #
     
     # publish to cmd_vel to move TurtleBot
     pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-    rate = rospy.Rate(20) # 20 Hz
+    rate = rospy.Rate(50) # 50 Hz
     
     # stop moving
     twist = Twist()
@@ -285,41 +330,61 @@ def pick_direction(): # NEED TO MODIFY THIS #
     
     time.sleep(1)
     
+    # Initialise found and angle
+    found = False
+    blocked_angle = False
+    angle = 0.0
+    angle2 = 180.0
+    current = 0
+    s_prev = 0
+    
+#    plt.imshow(rotated)
+#    plt.pause(1)
+    
+    # Convert rotated map back to numpy array, this array is editable
+    radar_map = np.array(rotated)
+    
+    time.sleep(1)
+    
     # Check every 30 degrees.
-    for i in range(0, 360, 1):
-        # Initialize the line parameter
-        rospy.loginfo(['[PICKDIRECTION] ' + 'Checking for angle at ' + str(i) + ' degrees'])
+    for i in range(0, 360, 10):
         
+        # minimum distance that lidar can detect.
         s = 6.5
         
-        
         # Using polar coordinates to index numpy array
-        x_val = rotated_size/2 + int(s * math.sin(math.radians(i)))
-        y_val = rotated_size/2 + int(s * math.cos(math.radians(i)))
-        current = radar_map[y_val][x_val]
+        x_val = int(rotated_size/2 + s * math.sin(math.radians(i)))
+        y_val = int(rotated_size/2 + s * math.cos(math.radians(i)))
+        current = check_region(x_val, y_val, radar_map)
         
-        radar_map[y_val][x_val] = 3
+        radar_map[y_val][x_val][0] = 255
         
-        for s in range (7, 100, 1):
+        for s in range (7, 250, 1):
+
+            # Using polar coordinates to index numpy array
+            x_val = int(rotated_size/2 + s * math.sin(math.radians(i)))
+            y_val = int(rotated_size/2 + s * math.cos(math.radians(i)))
+            current = check_region(x_val, y_val, radar_map)
             
-            sys.stdout.write(str(current))
+            radar_map[y_val][x_val][0] = 255
             
-            if (current == 2):
+            if (current == wall_color):
                 blocked_angle = True
                 break
             
-            
-            if (current == 0):
+            if (current == unmap_color):
                 angle = i
                 found = True
                 break
-            
-            # Using polar coordinates to index numpy array
-            x_val = rotated_size/2 + int(s * math.sin(math.radians(i))/2)
-            y_val = rotated_size/2 + int(s * math.cos(math.radians(i))/2)
-            current = radar_map[y_val][x_val]
         
-        print('')
+        if (abs(s - s_prev) > square_size*5 and i != 0):
+            x = int(rotated_size/2 + (s+s_prev) * math.sin(math.radians(i)) / 2)
+            y = int(rotated_size/2 + (s+s_prev) * math.cos(math.radians(i)) / 2)
+            if (check_line(x, y, i + 90 if (s > s_prev) else i + 80, radar_map) == unmap_color):
+                angle2 = i if (s > s_prev) else i - 10
+                break
+            
+        s_prev = s
         
         if (blocked_angle):
             blocked_angle = False
@@ -336,9 +401,13 @@ def pick_direction(): # NEED TO MODIFY THIS #
     plt.pause(1)
     
     if (found):
-        rospy.loginfo(['[PICKDIRECTION] '+'Picked direction: ' + str(angle) + ' ' + str(laser_range[angle]) + ' m'])
+        print(['[PICKDIRECTION] '+'Picked direction: ' + str(angle) + ' '])
+    elif (angle2):
+        print(['[PICKDIRECTION] '+'Using angle2: ' + str(angle2)])
+        angle = angle2
     else:
         rospy.loginfo(['[PICKDIRECTION] '+'Direction not found'])
+        angle = 180
 
     # rotate to that direction
     rotatebot(float(angle))
