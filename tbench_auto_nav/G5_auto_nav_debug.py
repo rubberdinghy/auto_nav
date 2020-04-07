@@ -62,7 +62,7 @@ front_angles = range(-front_angle,front_angle+1,1)
 clear_color = 1
 wall_color = 2
 unmap_color = 0
-square_size = 3
+square_size = 2
 
 def callback(msg, tfBuffer):
     global rotated
@@ -336,7 +336,7 @@ def pick_direction(): # NEED TO MODIFY THIS #
     time.sleep(1)
     
     # Check every 30 degrees.
-    for i in range(-180, 180, 10):
+    for i in range(-180, 180, 2):
         
         # minimum distance that lidar can detect.
         s = 5
