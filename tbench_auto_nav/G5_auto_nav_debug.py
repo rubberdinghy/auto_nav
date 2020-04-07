@@ -62,7 +62,7 @@ front_angles = range(-front_angle,front_angle+1,1)
 clear_color = 1
 wall_color = 2
 unmap_color = 0
-square_size = 5
+square_size = 3
 
 def callback(msg, tfBuffer):
     global rotated
@@ -339,7 +339,7 @@ def pick_direction(): # NEED TO MODIFY THIS #
     for i in range(-180, 180, 10):
         
         # minimum distance that lidar can detect.
-        s = 6.5
+        s = 5
         
         # Using polar coordinates to index numpy array
         x_val = int(rotated_size/2 + s * math.sin(math.radians(i)))
@@ -348,7 +348,7 @@ def pick_direction(): # NEED TO MODIFY THIS #
         
         radar_map[y_val][x_val] = 3
         
-        for s in range (7, 250, 1):
+        for s in range (5, 250, 1):
 
             # Using polar coordinates to index numpy array
             x_val = int(rotated_size/2 + s * math.sin(math.radians(i)))
@@ -391,9 +391,9 @@ def pick_direction(): # NEED TO MODIFY THIS #
     plt.pause(1)
     
     if (found):
-        print(['[PICKDIRECTION] '+'Picked direction: ' + str(angle) + ' With range ' + str(s)])
+        print(['[PICKDIRECTION] '+'Picked direction: ' + str(180 + angle) + ' With range ' + str(s)])
     elif (angle2):
-        print(['[PICKDIRECTION] '+'Using angle2: ' + str(angle2)])
+        print(['[PICKDIRECTION] '+'Using angle2: ' + str(180 + angle2)])
         angle = angle2
     else:
         rospy.loginfo(['[PICKDIRECTION] '+'Direction not found'])
