@@ -336,7 +336,7 @@ def pick_direction(): # NEED TO MODIFY THIS #
     time.sleep(1)
     
     # Check every 30 degrees.
-    for i in range(0, 360, 10):
+    for i in range(-180, 180, 10):
         
         # minimum distance that lidar can detect.
         s = 6.5
@@ -386,7 +386,7 @@ def pick_direction(): # NEED TO MODIFY THIS #
     
      # create image from 2D array using PIL
     img = Image.fromarray(radar_map.astype(np.uint8))
-    plt.figure(num=0, figsize=(15,15))
+    plt.figure(num=0, figsize=(5,5))
     plt.imshow(img)
     plt.pause(1)
     
@@ -436,7 +436,7 @@ def closure(mapdata):
     # So, we will check for contour closure by checking if any of the contours
     # have areas that are more than 10 times larger than the arc length
     # This value may need to be adjusted with more testing.
-    ALTHRESH = 10
+    ALTHRESH = 8
     # We will slightly fill in the contours to make them easier to detect
     DILATE_PIXELS = 3
 
