@@ -282,6 +282,13 @@ def pick_direction(): # NEED TO MODIFY THIS #
     
     # Convert rotated map back to numpy array
     radar_map = np.asarray(rotated)
+    temp = np.array(rotated)
+    
+    # create image from 2D array using PIL
+    img = Image.fromarray(radar_map.astype(np.uint8))
+    plt.imshow(img)
+    plt.pause(1)
+    
     
     time.sleep(1)
     
@@ -298,7 +305,6 @@ def pick_direction(): # NEED TO MODIFY THIS #
         y_val = rotated_size/2 + int(s * math.cos(math.radians(i)))
         current = radar_map[y_val][x_val]
         
-        radar_map[y_val][x_val] = 3
         
         for s in range (7, 100, 1):
             
@@ -318,6 +324,12 @@ def pick_direction(): # NEED TO MODIFY THIS #
             x_val = rotated_size/2 + int(s * math.sin(math.radians(i))/2)
             y_val = rotated_size/2 + int(s * math.cos(math.radians(i))/2)
             current = radar_map[y_val][x_val]
+            
+            # Check for the point along with its neighbors, add the values to blocked_angle
+            for x in range(-1, 1):
+                for y in range (-1, 1): 
+                    blocked_angle += radar_map[y_val + y][x_val + x]
+                    temp[y_val + y][x_val + x] = 3
         
         print('')
         
@@ -330,9 +342,9 @@ def pick_direction(): # NEED TO MODIFY THIS #
         
         rate.sleep()
     
-     # create image from 2D array using PIL
-    img = Image.fromarray(radar_map.astype(np.uint8))
-    plt.imshow(img)
+    # create image from 2D array using PIL
+    img2 = Image.fromarray(temp.astype(np.uint8))
+    plt.imshow(img2)
     plt.pause(1)
     
     if (found):

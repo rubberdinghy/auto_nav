@@ -262,9 +262,9 @@ def check_region(x, y, arr):
     
     for n in (-square_size, square_size):
         for m in (-square_size, square_size):
-            if (arr[y + n][x + m][0] == wall_color):
+            if (arr[y + n][x + m] == wall_color):
                 blocked = True
-            if (arr[y + n][x + m][0] == unmap_color):
+            if (arr[y + n][x + m] == unmap_color):
                 unmapped = True
     
     if (blocked):
@@ -284,7 +284,7 @@ def check_line(x, y, th, radar_map):
             y_val = int(y + sign * s * math.cos(math.radians(th)))
             current = check_region(x_val, y_val, radar_map)
             
-            radar_map[y_val][x_val][0] = 255
+            radar_map[y_val][x_val] = 3
             
             if (current == wall_color):
                 return wall_color
@@ -306,7 +306,7 @@ def pick_direction(): # NEED TO MODIFY THIS #
     
     # publish to cmd_vel to move TurtleBot
     pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-    rate = rospy.Rate(50) # 50 Hz
+    rate = rospy.Rate(25) # 25 Hz
     
     # stop moving
     twist = Twist()
@@ -314,21 +314,10 @@ def pick_direction(): # NEED TO MODIFY THIS #
     twist.angular.z = 0.0
     time.sleep(1)
     pub.publish(twist)
-    
-    
-    # Initialise found and angle
-    found = False
-    blocked_angle = False
-    angle = 0.0
-    current = int(0)
-    
-#    plt.imshow(rotated)
-#    plt.pause(1)
+
     
     # Convert rotated map back to numpy array
     radar_map = np.asarray(rotated)
-    
-    time.sleep(1)
     
     # Initialise found and angle
     found = False
@@ -357,7 +346,7 @@ def pick_direction(): # NEED TO MODIFY THIS #
         y_val = int(rotated_size/2 + s * math.cos(math.radians(i)))
         current = check_region(x_val, y_val, radar_map)
         
-        radar_map[y_val][x_val][0] = 255
+        radar_map[y_val][x_val] = 3
         
         for s in range (7, 250, 1):
 
@@ -366,7 +355,7 @@ def pick_direction(): # NEED TO MODIFY THIS #
             y_val = int(rotated_size/2 + s * math.cos(math.radians(i)))
             current = check_region(x_val, y_val, radar_map)
             
-            radar_map[y_val][x_val][0] = 255
+            radar_map[y_val][x_val] = 3
             
             if (current == wall_color):
                 blocked_angle = True
@@ -397,11 +386,12 @@ def pick_direction(): # NEED TO MODIFY THIS #
     
      # create image from 2D array using PIL
     img = Image.fromarray(radar_map.astype(np.uint8))
+    plt.figure(num=0, figsize=(15,15))
     plt.imshow(img)
     plt.pause(1)
     
     if (found):
-        print(['[PICKDIRECTION] '+'Picked direction: ' + str(angle) + ' '])
+        print(['[PICKDIRECTION] '+'Picked direction: ' + str(angle) + ' With range ' + str(s)])
     elif (angle2):
         print(['[PICKDIRECTION] '+'Using angle2: ' + str(angle2)])
         angle = angle2
@@ -410,7 +400,7 @@ def pick_direction(): # NEED TO MODIFY THIS #
         angle = 180
 
     # rotate to that direction
-    rotatebot(float(angle))
+    rotatebot(float(180.0 + angle))
 
     # start moving
     rospy.loginfo(['Start moving'])
