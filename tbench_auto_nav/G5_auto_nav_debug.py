@@ -62,7 +62,7 @@ front_angles = range(-front_angle,front_angle+1,1)
 clear_color = 1
 wall_color = 2
 unmap_color = 0
-square_size = 2
+square_size = 3
 
 def callback(msg, tfBuffer):
     global rotated
