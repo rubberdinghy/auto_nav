@@ -362,9 +362,10 @@ def pick_direction(WithFrontAngles): # NEED TO MODIFY THIS #
                 found = True
                 break
         
-        if (abs(s - s_prev) > square_size*20):
+        if (abs(s - s_prev) > square_size * 8):
             x = int(rotated_size/2 - (s+s_prev) * math.sin(math.radians(i)) / 2)
             y = int(rotated_size/2 + (s+s_prev) * math.cos(math.radians(i)) / 2)
+            
             if (check_line(x, y, i + 90 if (s > s_prev) else i + 80, radar_map, radar_map_view) == unmap_color):
                 angle2 = i if (s > s_prev) else i - 10
                 s2 = (s + s_prev) / 2
