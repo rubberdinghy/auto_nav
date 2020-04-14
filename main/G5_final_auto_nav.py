@@ -58,8 +58,8 @@ laser_range = np.array([])
 occdata = np.array([])
 yaw = 0.0
 rotate_speed = 0.4
-linear_speed = 0.2
-stop_distance = 0.7
+linear_speed = 0.17
+stop_distance = 0.65
 occ_bins = [-1, 0, 100, 101]
 front_angle = 20
 front_angles = range(-front_angle,front_angle+1,1)
@@ -415,15 +415,15 @@ def pick_direction(WithFrontAngles): # NEED TO MODIFY THIS #
         rotatebot(float(180.0 + angle))
     else:
 #        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found, reversing gear...'])
-#        reversebot()
-        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found, using largest distance'])
-        if laser_range.size != 0:
-            lr2i = np.argmax(laser_range)
-        else:
-            lr2i = 0
-    
-        rospy.loginfo(['Picked direction: ' + str(lr2i)])
-        angle = float(lr2i) - 180
+        reversebot()
+#        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found, using largest distance'])
+#        if laser_range.size != 0:
+#            lr2i = np.argmax(laser_range)
+#        else:
+#            lr2i = 0
+#    
+#        rospy.loginfo(['Picked direction: ' + str(lr2i)])
+#        angle = float(lr2i) - 180
 
     
     
