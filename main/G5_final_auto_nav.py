@@ -67,7 +67,7 @@ front_angles = range(-front_angle,front_angle+1,1)
 clear_color = 1
 wall_color = 2
 unmap_color = 0
-square_size = 6
+square_size = 5
 
 
 def callback(msg, tfBuffer):
@@ -414,16 +414,16 @@ def pick_direction(WithFrontAngles): # NEED TO MODIFY THIS #
         # rotate to that direction
         rotatebot(float(180.0 + angle))
     else:
-        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found, reversing gear...'])
-        reversebot()
-#        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found, using largest distance'])
-#        if laser_range.size != 0:
-#            lr2i = np.argmax(laser_range)
-#        else:
-#            lr2i = 0
-#    
-#        rospy.loginfo(['Picked direction: ' + str(lr2i)])
-#        angle = float(lr2i) - 180
+#        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found, reversing gear...'])
+#        reversebot()
+        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found, using largest distance'])
+        if laser_range.size != 0:
+            lr2i = np.argmax(laser_range)
+        else:
+            lr2i = 0
+    
+        rospy.loginfo(['Picked direction: ' + str(lr2i)])
+        angle = float(lr2i) - 180
 
     
     
