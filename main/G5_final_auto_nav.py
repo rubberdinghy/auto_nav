@@ -1,3 +1,11 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Apr 14 19:35:44 2020
+
+@author: ivanderjmw
+"""
+
 #!/usr/bin/env python
 
 # Version 0.2
@@ -8,9 +16,6 @@
 # Commented some loginfo to ease debugging
 # Utilised the polar angle to search for unmapped region, but problems were encountered (Keeps selecting angle of 0 degrees)
 # The closure() function was commented out because it gave an error, should ask to Dr Yen.
-
-
-import sys #for print w/o newline
 
 import rospy
 from nav_msgs.msg import Odometry
@@ -348,8 +353,8 @@ def pick_direction(WithFrontAngles): # NEED TO MODIFY THIS #
     radar_map_view = np.array(rotated)
     
     
-    # Check every 2 degrees from -180 to 180. i = angle
-    for i in range(-180, 180, 2):
+    # Check every 1 degrees from -180 to 180. i = angle
+    for i in range(-180, 180, 1):
         
         # Determine the use of Front angles (NOT USED)
         if ((not WithFrontAngles) and ((i + 180) < front_angle or (i + 180) > 360 - 1 * front_angle)):
@@ -382,8 +387,8 @@ def pick_direction(WithFrontAngles): # NEED TO MODIFY THIS #
         
         if (blocked_angle):
             
-            x = int(rotated_size/2 + (s - square_size) * math.sin(math.radians(i)))
-            y = int(rotated_size/2 + (s - square_size) * math.cos(math.radians(i)))
+            x = int(rotated_size/2 + (s - square_size * 0.75) * math.sin(math.radians(i)))
+            y = int(rotated_size/2 + (s - square_size * 0.75) * math.cos(math.radians(i)))
             
 #            print('Angle is ' + str(i) + ' and s is ' + str(s))
             
@@ -398,13 +403,6 @@ def pick_direction(WithFrontAngles): # NEED TO MODIFY THIS #
         
         rate.sleep()
     
-     # create image from 2D array using PIL
-    img = Image.fromarray(radar_map_view.astype(np.uint8))
-    plt.figure(num=0, figsize=(10,10))
-    plt.imshow(img)
-    plt.pause(0.1)
-    plt.draw_all()
-    plt.pause(0.1)
     
     if (found):
         rospy.loginfo(['[PICKDIRECTION] '+'Picked direction: ' + str(angle + 180) + ' With range ' + str(s)])
@@ -419,7 +417,7 @@ def pick_direction(WithFrontAngles): # NEED TO MODIFY THIS #
             lr2i = 0
     
         rospy.loginfo(['Picked direction: ' + str(lr2i)])
-        angle = float(lr2i)*0.5
+        angle = float(lr2i) - 180
 
     # rotate to that direction
     rotatebot(float(180.0 + angle))
