@@ -410,14 +410,16 @@ def pick_direction(WithFrontAngles): # NEED TO MODIFY THIS #
         rospy.loginfo(['[PICKDIRECTION] '+'Using angle2: ' + str(angle2 + 180) + ' With range ' + str(s2)])
         angle = angle2
     else:
-        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found, using largest distance'])
-        if laser_range.size != 0:
-            lr2i = np.argmax(laser_range)
-        else:
-            lr2i = 0
-    
-        rospy.loginfo(['Picked direction: ' + str(lr2i)])
-        angle = float(lr2i) - 180
+        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found, reversing gear...'])
+        reversebot()
+#        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found, using largest distance'])
+#        if laser_range.size != 0:
+#            lr2i = np.argmax(laser_range)
+#        else:
+#            lr2i = 0
+#    
+#        rospy.loginfo(['Picked direction: ' + str(lr2i)])
+#        angle = float(lr2i) - 180
 
     # rotate to that direction
     rotatebot(float(180.0 + angle))
@@ -553,7 +555,7 @@ def mover():
             lri[0] = []
         
         # if the list is not empty
-        if (len(lri2[0])>0 and len((laser_range[180] < float(stop_distance)).nonzero()) == 0):
+        if (len(lri2[0])>0 and len(lri2)>0):
             rospy.loginfo(['Move Backwards'])
             reversebot()
         
