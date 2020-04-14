@@ -406,9 +406,13 @@ def pick_direction(WithFrontAngles): # NEED TO MODIFY THIS #
     
     if (found):
         rospy.loginfo(['[PICKDIRECTION] '+'Picked direction: ' + str(angle + 180) + ' With range ' + str(s)])
+        # rotate to that direction
+        rotatebot(float(180.0 + angle))
     elif (use_angle2):
         rospy.loginfo(['[PICKDIRECTION] '+'Using angle2: ' + str(angle2 + 180) + ' With range ' + str(s2)])
         angle = angle2
+        # rotate to that direction
+        rotatebot(float(180.0 + angle))
     else:
         rospy.loginfo(['[PICKDIRECTION] '+'Direction not found, reversing gear...'])
         reversebot()
@@ -421,8 +425,7 @@ def pick_direction(WithFrontAngles): # NEED TO MODIFY THIS #
 #        rospy.loginfo(['Picked direction: ' + str(lr2i)])
 #        angle = float(lr2i) - 180
 
-    # rotate to that direction
-    rotatebot(float(180.0 + angle))
+    
     
     # start moving
     rospy.loginfo(['[PICKDIRECTION] ' + 'Start moving'])
