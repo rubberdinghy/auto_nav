@@ -129,7 +129,7 @@ def callback(msg, tfBuffer):
 #    rospy.loginfo(['Yaw: R: ' + str(yaw) + ' D: ' + str(np.degrees(yaw))])
 
     # rotate by 180 degrees to invert map so that the forward direction is at the top of the image
-    rotated = img_transformed.rotate(np.degrees(-yaw)+180)
+    rotated = img_transformed.rotate(np.degrees(-yaw) + 180)
     # we should now be able to access the map around the robot by converting
     # back to a numpy array: im2arr = np.array(rotated)
     
@@ -282,15 +282,18 @@ def check_line(x, y, th, radar_map, radar_map_view):
     
     
 #    for s in range (0, 50, 1):
-    s = 0
+    
         
     for sign in [-1,1]:
+        
+        s = 0
+        
         # Using polar coordinates to index numpy array
         x_val = int(x + sign * s * math.sin(math.radians(th)))
         y_val = int(y + sign * s * math.cos(math.radians(th)))
         current = check_region(x_val, y_val, radar_map)
         
-        radar_map_view[y_val][x_val] = 3
+        radar_map_view[y_val][x_val] = 4
         
         while (current != wall_color):
             # Using polar coordinates to index numpy array
@@ -298,7 +301,7 @@ def check_line(x, y, th, radar_map, radar_map_view):
             y_val = int(y + sign * s * math.cos(math.radians(th)))
             current = check_region(x_val, y_val, radar_map)
             
-            radar_map_view[y_val][x_val] = 3
+            radar_map_view[y_val][x_val] = 4
             
 #            print('color ' + str(current) + '(x,y) = (' + str(x_val) + ',' + str(y_val) +')')
             
@@ -374,30 +377,19 @@ def pick_direction(WithFrontAngles): # NEED TO MODIFY THIS #
                 angle = i
                 found = True
                 break
-        
-#        if (abs(s - s_prev) > square_size * 0):
-#            x = int(rotated_size/2 - (s+s_prev) * math.sin(math.radians(i)) / 2)
-#            y = int(rotated_size/2 + (s+s_prev) * math.cos(math.radians(i)) / 2)
-#            
-#            if (check_line(x, y, i + 90 if (s > s_prev) else i + 80, radar_map, radar_map_view) == unmap_color):
-#                angle2 = i if (s > s_prev) else i - 10
-#                s2 = (s + s_prev) / 2
-#                break
-            
        
-            
-        s_prev = s
         
         if (found):
             break
         
         if (blocked_angle):
             
-            x = int(rotated_size/2 + (s - square_size/2) * math.sin(math.radians(i)) / 2)
-            y = int(rotated_size/2 + (s - square_size/2) * math.cos(math.radians(i)) / 2)
+            x = int(rotated_size/2 + (s - square_size/2) * math.sin(math.radians(i)))
+            y = int(rotated_size/2 + (s - square_size/2) * math.cos(math.radians(i)))
+            
+#            print('Angle is ' + str(i) + ' and s is ' + str(s))
             
             if(check_line(x, y, i + 90, radar_map, radar_map_view) == unmap_color and s > square_size):
-#                print('Angle is ' + str(i + 180))
                 angle2 = i
                 s2 = s
             
@@ -558,7 +550,7 @@ def mover():
             lri[0] = []
         
         # if the list is not empty
-        if len(lri2[0]>0):
+        if (len(lri2[0])>0 and len((laser_range[180] < float(stop_distance)).nonzero()) == 0):
             rospy.loginfo(['Move Backwards'])
             reversebot()
         
