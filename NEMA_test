@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-=======
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Mar 31 20:27:26 2020
-
-@author: tuandung
-"""
-
->>>>>>> 8ccf310cdc9cfbde746f9f21ac86f7c577fc235f
 from time import sleep
 import RPi.GPIO as GPIO
 
@@ -50,8 +39,4 @@ for x in range(step_count):
     GPIO.output(STEP, GPIO.HIGH)
     sleep(delay)
     GPIO.output(STEP, GPIO.LOW)
-<<<<<<< HEAD
     sleep(delay)
-=======
-    sleep(delay)
->>>>>>> 8ccf310cdc9cfbde746f9f21ac86f7c577fc235f

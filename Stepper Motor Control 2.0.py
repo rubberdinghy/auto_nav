@@ -106,8 +106,8 @@ class Stepper_Motor(object):
 
 
 if __name__ == '__main__':
-    GPIO.setmode(GPIO.BOARD)
-    m = Stepper_Motor([31,33,35,37])
+    GPIO.setmode(GPIO.BCM)
+    m = Stepper_Motor([25,8,7,1])
     m.Motor_setup()
     m.right(90)
     sleep(1)

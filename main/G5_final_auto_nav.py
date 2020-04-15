@@ -1,3 +1,11 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Apr 14 19:35:44 2020
+
+@author: ivanderjmw
+"""
+
 #!/usr/bin/env python
 
 # Version 0.2
@@ -8,9 +16,6 @@
 # Commented some loginfo to ease debugging
 # Utilised the polar angle to search for unmapped region, but problems were encountered (Keeps selecting angle of 0 degrees)
 # The closure() function was commented out because it gave an error, should ask to Dr Yen.
-
-
-import sys #for print w/o newline
 
 import rospy
 from nav_msgs.msg import Odometry
@@ -52,12 +57,18 @@ rotated_size = 384
 laser_range = np.array([])
 occdata = np.array([])
 yaw = 0.0
-rotate_speed = 0.3
-linear_speed = 0.1
-stop_distance = 0.7
+rotate_speed = 0.4
+linear_speed = 0.17
+stop_distance = 0.65
 occ_bins = [-1, 0, 100, 101]
-front_angle = 25
+front_angle = 20
 front_angles = range(-front_angle,front_angle+1,1)
+
+clear_color = 1
+wall_color = 2
+unmap_color = 0
+square_size = 5
+
 
 def callback(msg, tfBuffer):
     global rotated
@@ -96,7 +107,7 @@ def callback(msg, tfBuffer):
     # reshape to 2D array using column order
     odata = np.uint8(oc3.reshape(msg.info.height,msg.info.width,order='F'))
     # set current robot location to 0
-    odata[grid_x][grid_y] = 0
+    odata[int(grid_x)][int(grid_y)] = 0
     # create image from 2D array using PIL
     img = Image.fromarray(odata.astype(np.uint8))
     # find center of image
@@ -123,7 +134,7 @@ def callback(msg, tfBuffer):
 #    rospy.loginfo(['Yaw: R: ' + str(yaw) + ' D: ' + str(np.degrees(yaw))])
 
     # rotate by 180 degrees to invert map so that the forward direction is at the top of the image
-    rotated = img_transformed.rotate(np.degrees(-yaw)+180)
+    rotated = img_transformed.rotate(np.degrees(-yaw) + 180)
     # we should now be able to access the map around the robot by converting
     # back to a numpy array: im2arr = np.array(rotated)
     
@@ -185,7 +196,7 @@ def get_occupancy(msg):
     # calculate total number of bins
     total_bins = msg.info.width * msg.info.height
     # log the info
-    rospy.loginfo('Unmapped: %i Unoccupied: %i Occupied: %i Total: %i', occ_counts[0][0], occ_counts[0][1], occ_counts[0][2], total_bins)
+#    rospy.loginfo('Unmapped: %i Unoccupied: %i Occupied: %i Total: %i', occ_counts[0][0], occ_counts[0][1], occ_counts[0][2], total_bins)
 
     # make msgdata go from 0 instead of -1, reshape into 2D
     oc2 = msgdata + 1
@@ -200,13 +211,13 @@ def rotatebot(rot_angle):
     twist = Twist()
     # set up Publisher to cmd_vel topic
     pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-    # set the update rate to 1 Hz
-    rate = rospy.Rate(1)
+    # set the update rate to 20 Hz
+    rate = rospy.Rate(20)
 
     # get current yaw angle
     current_yaw = np.copy(yaw)
     # log the info
-    rospy.loginfo(['Current: ' + str(math.degrees(current_yaw))])
+#    rospy.loginfo(['Current: ' + str(math.degrees(current_yaw))])
     # we are going to use complex numbers to avoid problems when the angles go from
     # 360 to 0, or from -180 to 180
     c_yaw = complex(math.cos(current_yaw),math.sin(current_yaw))
@@ -214,7 +225,7 @@ def rotatebot(rot_angle):
     target_yaw = current_yaw + math.radians(rot_angle)
     # convert to complex notation
     c_target_yaw = complex(math.cos(target_yaw),math.sin(target_yaw))
-    rospy.loginfo(['Desired: ' + str(math.degrees(cmath.phase(c_target_yaw)))])
+#    rospy.loginfo(['Desired: ' + str(math.degrees(cmath.phase(c_target_yaw)))])
     # divide the two complex numbers to get the change in direction
     c_change = c_target_yaw / c_yaw
     # get the sign of the imaginary component to figure out which way we have to turn
@@ -236,7 +247,7 @@ def rotatebot(rot_angle):
         current_yaw = np.copy(yaw)
         # get the current yaw in complex form
         c_yaw = complex(math.cos(current_yaw),math.sin(current_yaw))
-        rospy.loginfo('While Yaw: %f Target Yaw: %f', math.degrees(current_yaw), math.degrees(target_yaw))
+#        rospy.loginfo('While Yaw: %f Target Yaw: %f', math.degrees(current_yaw), math.degrees(target_yaw))
         # get difference in angle between current and target
         c_change = c_target_yaw / c_yaw
         # get the sign to see if we can stop
@@ -244,19 +255,71 @@ def rotatebot(rot_angle):
         # rospy.loginfo(['c_change_dir: ' + str(c_change_dir) + ' c_dir_diff: ' + str(c_dir_diff)])
         rate.sleep()
 
-    rospy.loginfo(['End Yaw: ' + str(math.degrees(current_yaw))])
+#    rospy.loginfo(['End Yaw: ' + str(math.degrees(current_yaw))])
     # set the rotation speed to 0
     twist.angular.z = 0.0
     # stop the rotation
-    time.sleep(1)
+    time.sleep(0.1)
     pub.publish(twist)
+    
+    stopbot()
+
+def check_region(x, y, arr):
+    blocked = False
+    unmapped = False
+    
+    for n in (-square_size/2, square_size/2, 1):
+        for m in (-square_size/2, square_size/2, 1):
+            if (arr[y + n][x + m] == wall_color):
+                blocked = True
+            if (arr[y + n][x + m] == unmap_color):
+                unmapped = True
+    
+    if (blocked):
+        return wall_color
+    elif (unmapped):
+        return unmap_color
+    else: 
+        return clear_color
+    
+def check_line(x, y, th, radar_map, radar_map_view):
+    
+    
+#    for s in range (0, 50, 1):
+    
+        
+    for sign in [-1,1]:
+        
+        s = 0
+        
+        # Using polar coordinates to index numpy array
+        x_val = int(x + sign * s * math.sin(math.radians(th)))
+        y_val = int(y + sign * s * math.cos(math.radians(th)))
+        current = check_region(x_val, y_val, radar_map)
+        
+        while (current != wall_color):
+            # Using polar coordinates to index numpy array
+            x_val = int(x + sign * s * math.sin(math.radians(th)))
+            y_val = int(y + sign * s * math.cos(math.radians(th)))
+            current = check_region(x_val, y_val, radar_map)
+            
+#            print('color ' + str(current) + '(x,y) = (' + str(x_val) + ',' + str(y_val) +')')
+            
+            s += 1
+            
+            if (current == unmap_color):
+                radar_map_view[y][x] = 4
+                return unmap_color
+        
+    return clear_color 
 
 
-def pick_direction(): # NEED TO MODIFY THIS #
+
+def pick_direction(WithFrontAngles): # NEED TO MODIFY THIS #
     global laser_range
     global rotated
     
-    rospy.loginfo(['[PICKDIRECTION] '+'Picking direction...'])
+    rospy.loginfo(['[PICKDIRECTION] '+'Picking direction WithFrontAngles = ' + str(WithFrontAngles)])
     
     
     # publish to cmd_vel to move TurtleBot
@@ -269,94 +332,103 @@ def pick_direction(): # NEED TO MODIFY THIS #
     twist.angular.z = 0.0
     time.sleep(1)
     pub.publish(twist)
+
     
+    # Convert rotated map back to numpy array
+    radar_map = np.asarray(rotated)
     
     # Initialise found and angle
     found = False
+    use_angle2 = False
     blocked_angle = False
-    angle = 0.0
-    current = int(0)
+    angle = -90
+    angle2 = -90
+    current = 0
+    s2 = 0
     
 #    plt.imshow(rotated)
 #    plt.pause(1)
     
-    # Convert rotated map back to numpy array
-    radar_map = np.asarray(rotated)
-    temp = np.array(rotated)
-    
-    # create image from 2D array using PIL
-    img = Image.fromarray(radar_map.astype(np.uint8))
-    plt.imshow(img)
-    plt.pause(1)
+    # Convert rotated map back to numpy array, this array is editable
+    radar_map_view = np.array(rotated)
     
     
-    time.sleep(1)
-    
-    # Check every 30 degrees.
-    for i in range(0, 360, 1):
-        # Initialize the line parameter
-        rospy.loginfo(['[PICKDIRECTION] ' + 'Checking for angle at ' + str(i) + ' degrees'])
+    # Check every 1 degrees from -180 to 180. i = angle
+    for i in range(-180, 180, 1):
         
-        s = 6.5
-        
-        
-        # Using polar coordinates to index numpy array
-        x_val = rotated_size/2 + int(s * math.sin(math.radians(i)))
-        y_val = rotated_size/2 + int(s * math.cos(math.radians(i)))
-        current = radar_map[y_val][x_val]
-        
-        
-        for s in range (7, 100, 1):
+        # Determine the use of Front angles (NOT USED)
+        if ((not WithFrontAngles) and ((i + 180) < front_angle or (i + 180) > 360 - 1 * front_angle)):
+            continue
+
+        # Shoots rays from the bot to an angle i (keep increasing distance until either wall or unmapped)
+        for s in range (square_size / 2, 250, 1):
+
+            # Using polar coordinates to index numpy array, and check a square region
+            x_val = int(rotated_size/2 + s * math.sin(math.radians(i)))
+            y_val = int(rotated_size/2 + s * math.cos(math.radians(i)))
+            current = check_region(x_val, y_val, radar_map)
             
-            sys.stdout.write(str(current))
+            radar_map_view[y_val][x_val] = 3
             
-            if (current == 2):
+            # Blocked angle if the ray hits a wall
+            if (current == wall_color):
                 blocked_angle = True
                 break
             
-            
-            if (current == 0):
+            # Stores the angle and later picks it
+            if (current == unmap_color and s > square_size * 3):
                 angle = i
                 found = True
                 break
-            
-            # Using polar coordinates to index numpy array
-            x_val = rotated_size/2 + int(s * math.sin(math.radians(i))/2)
-            y_val = rotated_size/2 + int(s * math.cos(math.radians(i))/2)
-            current = radar_map[y_val][x_val]
-            
-            # Check for the point along with its neighbors, add the values to blocked_angle
-            for x in range(-1, 1):
-                for y in range (-1, 1): 
-                    blocked_angle += radar_map[y_val + y][x_val + x]
-                    temp[y_val + y][x_val + x] = 3
-        
-        print('')
-        
-        if (blocked_angle):
-            blocked_angle = False
-            continue
+       
         
         if (found):
             break
         
+        if (blocked_angle):
+            
+            x = int(rotated_size/2 + (s - square_size * 0.75) * math.sin(math.radians(i)))
+            y = int(rotated_size/2 + (s - square_size * 0.75) * math.cos(math.radians(i)))
+            
+#            print('Angle is ' + str(i) + ' and s is ' + str(s))
+            
+            if(check_line(x, y, i + 90, radar_map, radar_map_view) == unmap_color and s > square_size * 3):
+                angle2 = i
+                s2 = s
+                use_angle2 = True
+            
+            blocked_angle = False
+            continue
+        
+        
         rate.sleep()
     
-    # create image from 2D array using PIL
-    img2 = Image.fromarray(temp.astype(np.uint8))
-    plt.imshow(img2)
-    plt.pause(1)
     
     if (found):
-        rospy.loginfo(['[PICKDIRECTION] '+'Picked direction: ' + str(angle) + ' ' + str(laser_range[angle]) + ' m'])
+        rospy.loginfo(['[PICKDIRECTION] '+'Picked direction: ' + str(angle + 180) + ' With range ' + str(s)])
+        # rotate to that direction
+        rotatebot(float(180.0 + angle))
+    elif (use_angle2):
+        rospy.loginfo(['[PICKDIRECTION] '+'Using angle2: ' + str(angle2 + 180) + ' With range ' + str(s2)])
+        angle = angle2
+        # rotate to that direction
+        rotatebot(float(180.0 + angle))
     else:
-        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found'])
+#        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found, reversing gear...'])
+        reversebot()
+#        rospy.loginfo(['[PICKDIRECTION] '+'Direction not found, using largest distance'])
+#        if laser_range.size != 0:
+#            lr2i = np.argmax(laser_range)
+#        else:
+#            lr2i = 0
+#    
+#        rospy.loginfo(['Picked direction: ' + str(lr2i)])
+#        angle = float(lr2i) - 180
 
-    # rotate to that direction
-    rotatebot(float(angle))
-
+    
+    
     # start moving
-    rospy.loginfo(['Start moving'])
+    rospy.loginfo(['[PICKDIRECTION] ' + 'Start moving'])
     twist.linear.x = linear_speed
     twist.angular.z = 0.0
     # not sure if this is really necessary, but things seem to work more
@@ -374,6 +446,17 @@ def stopbot():
     twist.angular.z = 0.0
     time.sleep(1)
     pub.publish(twist)
+    
+def reversebot():
+    # publish to cmd_vel to move TurtleBot
+    pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+
+    twist = Twist()
+    twist.linear.x = -0.1
+    twist.angular.z = 0.0
+    time.sleep(1)
+    pub.publish(twist)
+    stopbot()
 
 
 def closure(mapdata):
@@ -389,7 +472,7 @@ def closure(mapdata):
     # So, we will check for contour closure by checking if any of the contours
     # have areas that are more than 10 times larger than the arc length
     # This value may need to be adjusted with more testing.
-    ALTHRESH = 10
+    ALTHRESH = 8
     # We will slightly fill in the contours to make them easier to detect
     DILATE_PIXELS = 3
 
@@ -460,7 +543,7 @@ def mover():
 
     # find direction with the largest distance from the Lidar,
     # rotate to that direction, and start moving
-    pick_direction()
+    pick_direction(True)
     
     
 
@@ -469,12 +552,18 @@ def mover():
             # check distances in front of TurtleBot and find values less
             # than stop_distance
             lri = (laser_range[front_angles]<float(stop_distance)).nonzero()
-            rospy.loginfo('Distances: %s', str(lri))
+            lri2 = (laser_range[front_angles]<float(stop_distance/2)).nonzero()
+#            rospy.loginfo('Distances: %s', str(lri))
         else:
             lri[0] = []
-
+        
         # if the list is not empty
-        if(len(lri[0])>0):
+        if (len(lri2[0])>0 and len(lri2)>0):
+            rospy.loginfo(['Move Backwards'])
+            reversebot()
+        
+        # if the list is not empty
+        elif(len(lri[0])>0):
             rospy.loginfo(['Stop!'])
             
             # call occupancy
@@ -483,7 +572,7 @@ def mover():
             # find direction with the largest distance from the Lidar
             # rotate to that direction
             # start moving
-            pick_direction()
+            pick_direction(True)
 
         #check if SLAM map is complete
         if contourCheck :

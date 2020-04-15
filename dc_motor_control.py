@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Mon Mar 23 22:30:44 2020
@@ -39,11 +39,11 @@ if __name__ == '__main__' :
 	r_pwm = 0
 	l_pwm = 0
 	while  (True) :
-		x = input('Enter direction (L/R):')
-        	if (x == "R"):
+		x = int(input('Enter direction (L/R):'))
+        	if (x == 0):
 			r_pwm = 100 - r_pwm
 			dc_right.change_pwm(r_pwm)
-		elif (x == "L"):
+		elif (x == 1):
 			l_pwm = 100 - l_pwm
 			dc_left.change_pwm(l_pwm)
 
