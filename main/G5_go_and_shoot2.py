@@ -36,6 +36,14 @@ front_angles = range(-front_angle,front_angle+1,1)
 shoot_distance = .5
 distance_threshold = .02
 
+def get_target_y(msg):
+    global target_y
+    target_y = float(str(msg).split(" ")[1])
+         
+def get_target_x(msg):
+    global target_x
+    target_x = float(str(msg).split(" ")[1])
+
 
 def get_odom_dir(msg):
     global yaw
@@ -204,7 +212,11 @@ def searchshoot():
     
     rate = rospy.Rate(1) # Rate of 1 Hz
 
-    rotatebot(90)
+    rospy.loginfo("forwardbot() reversebot() rotatebot(20) rotatebot(70)")
+    forwardbot()
+    reversebot()
+    rotatebot(20)
+    rotatebot(70)
 
     while not rospy.is_shutdown():
         rospy.loginfo("Now taking aim")
@@ -213,13 +225,7 @@ def searchshoot():
         rate.sleep()
     
                      
-def get_target_y(msg):
-    global target_y
-    target_y = float(str(msg).split(" ")[1])
-         
-def get_target_x(msg):
-    global target_x
-    target_x = float(str(msg).split(" ")[1])
+
 
     
 
