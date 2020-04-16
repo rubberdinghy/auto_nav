@@ -22,8 +22,8 @@ import cv2
 from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient
 
-#import G5_dc_motor
-#import G5_stepper
+import G5_dc_motor
+import G5_stepper
 import G5_camera4
 
 
@@ -160,10 +160,12 @@ def shoot():
     dc_left = G5_dc_motor.dc_motor(18)
     dc_right = G5_dc_motor.dc_motor(12)
         
-    dc_right.change_pwm(50)
-    dc_left.change_pwm(50)
+    dc_right.change_pwm(100)
+    dc_left.change_pwm(100)
 
-    G5_stepper.forward(20, 50)
+    G5_stepper.left(300)
+
+    time.sleep(5)
 
     dc_right.stop()
     dc_left.stop()
@@ -183,25 +185,27 @@ def takeaim():
 #             reversebot()
 #         elif (lr0 < shoot_distance):
 #             forwardbot()
-            
-#    while (abs(target_x - 300) < 5):
-
-    # while (True):
-    time.sleep(0.5)
-    rospy.loginfo(str(target_x) + " " + str(target_y))
-    if (target_x==0):
-        rospy.loginfo("feed me data!")
-        
-    elif (target_x > 300):
-        rospy.loginfo("left")
-        rotatebot(-0.5)
-    elif (target_x < 300):
-        rospy.loginfo("right")
-        rotatebot(0.5)
-
     
-    #check_dir
+    rate = rospy.Rate(5) # Rate of 5 Hz
+
+    # check_dir
     #   see the red target on camera. If it is not center, then rotate the bot slowly to center it.
+    while (abs(target_x - 300) > 5):
+        time.sleep(0.5)
+        rospy.loginfo(str(target_x) + " " + str(target_y))
+
+        if (target_x > 300):
+            rospy.loginfo("left")
+            rotatebot(-0.5)
+        elif (target_x < 300):
+            rospy.loginfo("right")
+            rotatebot(0.5)
+
+        rate.sleep()
+    
+    # When everything is aligned, rotate the bot 180 degrees to shoot.
+    rotatebot(180.0)
+    shoot()
 
 
 def searchshoot():
@@ -218,21 +222,22 @@ def searchshoot():
     rospy.Subscriber('coordinates_y', Float32, get_target_y)
     rospy.Subscriber('coordinates_x', Float32, get_target_x)
     
+    rate = rospy.Rate(1) # Rate of 1 Hz
 
     while not rospy.is_shutdown():
         rospy.loginfo("Now taking aim")
         takeaim()
+
+        rate.sleep()
     
                      
 def get_target_y(msg):
     global target_y
     target_y = float(str(msg).split(" ")[1])
-    time.sleep(0.5)
          
 def get_target_x(msg):
     global target_x
     target_x = float(str(msg).split(" ")[1])
-    time.sleep(0.5)
 
     
 
