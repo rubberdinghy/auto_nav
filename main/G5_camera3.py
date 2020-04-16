@@ -6,6 +6,40 @@ Created on Mon Mar 30 05:56:04 2020
 """
 
 #!/usr/bin/env python
+# import the necessary packages
+
+from imutils.video import WebcamVideoStream
+class VideoStream:
+	def __init__(self, src=0, usePiCamera=False, resolution=(320, 240), framerate=32):
+		# check to see if the picamera module should be used
+		if usePiCamera:
+			# only import the picamera packages unless we are
+			# explicity told to do so -- this helps remove the
+			# requirement of `picamera[array]` from desktops or
+			# laptops that still want to use the `imutils` package
+			from pivideostream import PiVideoStream
+			# initialize the picamera stream and allow the camera
+			# sensor to warmup
+			self.stream = PiVideoStream(resolution=resolution, framerate=framerate)
+		# otherwise, we are using OpenCV so initialize the webcam
+		# stream
+		else:
+			self.stream = WebcamVideoStream(src=src)
+            
+	def start(self):
+		# start the threaded video stream
+		return self.stream.start()
+	def update(self):
+		# grab the next frame from the stream
+		self.stream.update()
+	def read(self):
+		# return the current frame
+		return self.stream.read()
+	def stop(self):
+		# stop the thread and release any resources
+		self.stream.stop()
+		
+		
 import cv2
 import numpy as np
 import rospy
@@ -14,10 +48,6 @@ from collections import deque
 import argparse
 import imutils
 import sys
-from picamera import PiCamera
-from picamera.array import PiRGBArray
-
-
 
 
 def talker():
@@ -32,11 +62,10 @@ def talker():
 	greenLower = (155, 103, 82)
 	greenUpper = (178, 255, 255)
 	pts = deque(maxlen=64)
-	picam = PiCamera()
-	picam.resolution = (640, 480)
-	picam.framerate = 32
-	camera = PiRGBArray(camera, size = (640,480))
-	
+	if not args.get("video", False):
+		camera = VideoStream()
+	else:
+		camera = VideoStream('args["video"]')
 
 	while not rospy.is_shutdown():
 		(grabbed, frame) = camera.read()
@@ -78,6 +107,6 @@ if __name__ == '__main__':
     try:
         talker()
     except rospy.ROSInterruptException:
-	video_capture.release()
+	camera.stop()
 	cv2.destroyAllWindows()
 	pass
