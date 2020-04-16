@@ -11,9 +11,6 @@ import G5_stepper
 import time
 from std_msgs.msg import Bool
 
-dc_left = G5_dc_motor.dc_motor(18)
-dc_right = G5_dc_motor.dc_motor(12)
-
 def shoot():
     global dc_left
     global dc_right
@@ -22,8 +19,8 @@ def shoot():
     rospy.loginfo("[SHOOTER] Turning on Motors")
     
     
-    dc_right.change_pwm(100)
-    dc_left.change_pwm(100)
+    G5_dc_motor.dc_right.change_pwm(100)
+    G5_dc_motor.dc_left.change_pwm(100)
 
     time.sleep(5)
 
