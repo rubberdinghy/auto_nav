@@ -14,6 +14,8 @@ from collections import deque
 import argparse
 import imutils
 import sys
+from picamera import PiCamera
+from picamera.array import PiRGBArray
 
 
 
@@ -30,10 +32,11 @@ def talker():
 	greenLower = (155, 103, 82)
 	greenUpper = (178, 255, 255)
 	pts = deque(maxlen=64)
-	if not args.get("video", False):
-		camera = cv2.VideoCapture()
-	else:
-		camera = cv2.VideoCapture('args["video"]')
+	picam = PiCamera()
+	picam.resolution = (640, 480)
+	picam.framerate = 32
+	camera = PiRGBArray(camera, size = (640,480))
+	
 
 	while not rospy.is_shutdown():
 		(grabbed, frame) = camera.read()
