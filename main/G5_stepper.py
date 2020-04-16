@@ -125,7 +125,7 @@ def right(step):
 while True:
     dir = str(input('Enter rotation direction (L/R):'))
     if dir == 'L':
-        left(input('value:'))
+        left(int(input('value:')))
     elif dir == 'R':
-	    right(input('value:'))
+	    right(int(input('value:')))
 GPIO.cleanup()
