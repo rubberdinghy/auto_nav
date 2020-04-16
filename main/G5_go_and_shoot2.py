@@ -24,7 +24,7 @@ from sound_play.libsoundplay import SoundClient
 
 #import G5_dc_motor
 #import G5_stepper
-import G5_camera4
+import G5_camera5
 
 
 laser_range = np.array([])
