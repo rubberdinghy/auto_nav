@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Apr 16 01:05:56 2020
+
+@author: ivanderjmw
+"""
+
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
@@ -20,7 +28,7 @@ class dc_motor(object):
     
     def change_pwm(self, value): 
         self.pwm.ChangeDutyCycle(value)
-    	self.pwm.start(value)
+        self.pwm.start(value)
 
     def run(self): 
         GPIO.output(self.p, GPIO.HIGH)
@@ -36,24 +44,24 @@ dc_right = dc_motor(12)
 
 if __name__ == '__main__' :
     try:
-	r_pwm = 0
-	l_pwm = 0
-	while  (True) :
-        x = str(input('Enter direction (L/R):'))
-        
-        if(x == "R"):
-            r_pwm = 100 - r_pwm
-            dc_right.change_pwm(r_pwm)
-        elif (x == "L"):
-            l_pwm = 100 - l_pwm
-            dc_left.change_pwm(l_pwm)
-
-		#dc_left.change_pwm(100)
-       		#sleep(2)
-        	#dc_left.stop()
-        	#dc_right.change_pwm(50)
-        	#sleep(1)
-        	#dc_right.stop()
+        r_pwm = 0
+        l_pwm = 0
+        while  (True) :
+            x = str(input('Enter direction (L/R):'))
+            
+            if(x == "R"):
+                r_pwm = 100 - r_pwm
+                dc_right.change_pwm(r_pwm)
+            elif (x == "L"):
+                l_pwm = 100 - l_pwm
+                dc_left.change_pwm(l_pwm)
+    
+    		#dc_left.change_pwm(100)
+           		#sleep(2)
+            	#dc_left.stop()
+            	#dc_right.change_pwm(50)
+            	#sleep(1)
+            	#dc_right.stop()
     except KeyboardInterrupt() :
         GPIO.cleanup()
     
