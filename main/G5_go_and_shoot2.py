@@ -106,7 +106,7 @@ def rotatebot(rot_angle):
         # rospy.loginfo(['c_change_dir: ' + str(c_change_dir) + ' c_dir_diff: ' + str(c_dir_diff)])
         rate.sleep()
 
-   rospy.loginfo(['End Yaw: ' + str(math.degrees(current_yaw))])
+    rospy.loginfo(['End Yaw: ' + str(math.degrees(current_yaw))])
     # set the rotation speed to 0
     twist.angular.z = 0.0
     # stop the rotation
