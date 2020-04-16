@@ -9,7 +9,7 @@ import rospy
 import G5_dc_motor
 import G5_stepper
 import time
-rom std_msgs.msg import Bool
+from std_msgs.msg import Bool
 
 def shoot():
     dc_left = G5_dc_motor.dc_motor(18)
