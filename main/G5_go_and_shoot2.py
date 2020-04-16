@@ -68,7 +68,7 @@ def rotatebot(rot_angle):
     # get current yaw angle
     current_yaw = np.copy(yaw)
     # log the info
-   rospy.loginfo(['Current: ' + str(math.degrees(current_yaw))])
+    rospy.loginfo(['Current: ' + str(math.degrees(current_yaw))])
     # we are going to use complex numbers to avoid problems when the angles go from
     # 360 to 0, or from -180 to 180
     c_yaw = complex(math.cos(current_yaw),math.sin(current_yaw))
@@ -76,7 +76,7 @@ def rotatebot(rot_angle):
     target_yaw = current_yaw + math.radians(rot_angle)
     # convert to complex notation
     c_target_yaw = complex(math.cos(target_yaw),math.sin(target_yaw))
-   rospy.loginfo(['Desired: ' + str(math.degrees(cmath.phase(c_target_yaw)))])
+    rospy.loginfo(['Desired: ' + str(math.degrees(cmath.phase(c_target_yaw)))])
     # divide the two complex numbers to get the change in direction
     c_change = c_target_yaw / c_yaw
     # get the sign of the imaginary component to figure out which way we have to turn
@@ -98,7 +98,7 @@ def rotatebot(rot_angle):
         current_yaw = np.copy(yaw)
         # get the current yaw in complex form
         c_yaw = complex(math.cos(current_yaw),math.sin(current_yaw))
-       rospy.loginfo('While Yaw: %f Target Yaw: %f', math.degrees(current_yaw), math.degrees(target_yaw))
+        rospy.loginfo('While Yaw: %f Target Yaw: %f', math.degrees(current_yaw), math.degrees(target_yaw))
         # get difference in angle between current and target
         c_change = c_target_yaw / c_yaw
         # get the sign to see if we can stop
