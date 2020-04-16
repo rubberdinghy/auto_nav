@@ -155,7 +155,7 @@ def forwardbot():
     pub.publish(twist)
     stopbot()
 
-"""
+
 def shoot():
     dc_left = G5_dc_motor.dc_motor(18)
     dc_right = G5_dc_motor.dc_motor(12)
@@ -167,7 +167,7 @@ def shoot():
 
     dc_right.stop()
     dc_left.stop()
-"""
+
 
 def takeaim():
 
@@ -176,7 +176,7 @@ def takeaim():
     #check_size
     #   if it is too big then move backwards, too small then move fowrards. Can also use the lidar data
     
-    #lr0 = laser_range[0]
+#     lr0 = laser_range[0]
     
 #     while (abs(lr0 - shoot_distance) < distance_threshold):
 #         if (lr0 > shoot_distance):
@@ -194,13 +194,10 @@ def takeaim():
         
     elif (target_x > 300):
         rospy.loginfo("left")
-        
-        #rotatebot(-0.5)
+        rotatebot(-0.5)
     elif (target_x < 300):
         rospy.loginfo("right")
-            
-            
-            #rotatebot(0.5)
+        rotatebot(0.5)
 
     
     #check_dir
