@@ -9,6 +9,7 @@ import rospy
 import G5_dc_motor
 import G5_stepper
 import time
+import RPi.GPIO as GPIO
 from std_msgs.msg import Bool
 
 def shoot():
