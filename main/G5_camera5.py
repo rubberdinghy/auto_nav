@@ -21,7 +21,7 @@ def talker():
 	rospy.init_node('ball_tracking1', anonymous=True)
 	pubx=rospy.Publisher('coordinates_x',Float32,queue_size=1)
 	puby=rospy.Publisher('coordinates_y',Float32,queue_size=1)
-	rate = rospy.Rate(20) # 10hz
+	rate = rospy.Rate(40) # 10hz
         ap = argparse.ArgumentParser()
 	ap.add_argument("-v", "--video", dest="/home/arabinda/catkin_ws/src/ros_seminar/scripts/ball_tracking_example.mp4",help="path")
 	ap.add_argument("-b", "--buffer", type=int, default=64,help="max buffer size")
