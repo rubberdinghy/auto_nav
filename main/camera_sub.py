@@ -1,40 +1,70 @@
-import rospy
-from sensor_msgs.msg import Image
-from cv_bridge import CvBridge
-import cv2
-import os
-import numpy as np
-
-class Nodo(object):
-    def __init__(self):
-        # Params
-        self.image = None
-        self.br = CvBridge()
-        # Node cycle rate (in Hz).
-        self.loop_rate = rospy.Rate(1)
-
-        # Publishers
-        self.pub = rospy.Publisher('imagetimer', Image,queue_size=10)
-
-        # Subscribers
-        rospy.Subscriber("/raspicam_node/camera/compressed",Image,self.callback)
-
-    def callback(self, msg):
-        rospy.loginfo('Image received...')
-        self.image = self.br.imgmsg_to_cv2(msg)
-
-
+# import the necessary packages
+from webcamvideostream import WebcamVideoStream
+class VideoStream:
+    def __init__(self, src=0, usePiCamera=False, resolution=(320, 240),
+		framerate=32):
+		# check to see if the picamera module should be used
+		if usePiCamera:
+			# only import the picamera packages unless we are
+			# explicity told to do so -- this helps remove the
+			# requirement of `picamera[array]` from desktops or
+			# laptops that still want to use the `imutils` package
+			from pivideostream import PiVideoStream
+			# initialize the picamera stream and allow the camera
+			# sensor to warmup
+			self.stream = PiVideoStream(resolution=resolution,
+				framerate=framerate)
+		# otherwise, we are using OpenCV so initialize the webcam
+		# stream
+		else:
+			self.stream = WebcamVideoStream(src=src)
+            
     def start(self):
-        rospy.loginfo("Timing images")
-        #rospy.spin()
-        while not rospy.is_shutdown():
-            rospy.loginfo('publishing image')
-            #br = CvBridge()
-            if self.image is not None:
-                self.pub.publish(br.cv2_to_imgmsg(self.image))
-            self.loop_rate.sleep()
+		# start the threaded video stream
+		return self.stream.start()
+	def update(self):
+		# grab the next frame from the stream
+		self.stream.update()
+	def read(self):
+		# return the current frame
+		return self.stream.read()
+	def stop(self):
+		# stop the thread and release any resources
+		self.stream.stop()
+        
+# import the necessary packages
+from imutils.video import VideoStream
+import datetime
+import argparse
+import imutils
+import time
+import cv2
+# construct the argument parse and parse the arguments
+ap = argparse.ArgumentParser()
+ap.add_argument("-p", "--picamera", type=int, default=-1,
+	help="whether or not the Raspberry Pi camera should be used")
+args = vars(ap.parse_args())
+# initialize the video stream and allow the cammera sensor to warmup
+vs = VideoStream(usePiCamera=args["picamera"] > 0).start()
+time.sleep(2.0)
 
-if __name__ == '__main__':
-    rospy.init_node("imagetimer111", anonymous=True)
-    my_node = Nodo()
-    my_node.start()
+# loop over the frames from the video stream
+while True:
+	# grab the frame from the threaded video stream and resize it
+	# to have a maximum width of 400 pixels
+	frame = vs.read()
+	frame = imutils.resize(frame, width=400)
+	# draw the timestamp on the frame
+	timestamp = datetime.datetime.now()
+	ts = timestamp.strftime("%A %d %B %Y %I:%M:%S%p")
+	cv2.putText(frame, ts, (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX,
+		0.35, (0, 0, 255), 1)
+	# show the frame
+	cv2.imshow("Frame", frame)
+	key = cv2.waitKey(1) & 0xFF
+	# if the `q` key was pressed, break from the loop
+	if key == ord("q"):
+		break
+# do a bit of cleanup
+cv2.destroyAllWindows()
+vs.stop()
