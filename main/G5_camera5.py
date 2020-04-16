@@ -21,7 +21,7 @@ def talker():
 	rospy.init_node('ball_tracking1', anonymous=True)
 	pubx=rospy.Publisher('coordinates_x',Float32,queue_size=1)
 	puby=rospy.Publisher('coordinates_y',Float32,queue_size=1)
-	rate = rospy.Rate(40) # 10hz
+	rate = rospy.Rate(20) # 10hz
         ap = argparse.ArgumentParser()
 	ap.add_argument("-v", "--video", dest="/home/arabinda/catkin_ws/src/ros_seminar/scripts/ball_tracking_example.mp4",help="path")
 	ap.add_argument("-b", "--buffer", type=int, default=64,help="max buffer size")
@@ -56,9 +56,9 @@ def talker():
 			puby.publish(int(M["m01"] / M["m00"]))
 			rospy.loginfo(str('x')+str(int(M["m10"] / M["m00"])) + str('y') + str(int(M["m01"] / M["m00"])))
 			rate.sleep()
-			if radius > 10:
-				cv2.circle(frame, (int(x), int(y)), int(radius),(0, 255, 255), 2)
-				cv2.circle(frame, center, 5, (0, 0, 255), -1)
+			# if radius > 10:
+			# 	cv2.circle(frame, (int(x), int(y)), int(radius),(0, 255, 255), 2)
+			# 	cv2.circle(frame, center, 5, (0, 0, 255), -1)
 		pts.appendleft(center)
 
 		# cv2.imshow("Frame", frame)
