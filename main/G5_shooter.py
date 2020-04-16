@@ -29,7 +29,7 @@ def callback(msg):
     shoot()
 
 def waiting():
-  rospy.Subscriber("shoot_signal", Bool, callback)
+  rospy.Subscriber("shoot_signal", bool, callback)
   rospy.spin()
     
 
