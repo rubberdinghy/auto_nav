@@ -185,7 +185,9 @@ def takeaim():
     
     # When everything is aligned, rotate the bot 180 degrees to shoot.
     rotatebot(180.0)
-    shoot()
+    shooting = rospy.Publisher('shoot_signal', bool, queue_size=1)
+    shooting.publish(bool(True))
+    rospy.loginfo ('Running GUN!')
 
 
 def searchshoot():
