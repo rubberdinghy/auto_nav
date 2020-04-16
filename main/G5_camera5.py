@@ -42,8 +42,8 @@ def talker():
 		frame = imutils.resize(frame, width=600)
 		hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 		mask = cv2.inRange(hsv, greenLower, greenUpper)
-		mask = cv2.erode(mask, None, iterations=2)
-		mask = cv2.dilate(mask, None, iterations=2)
+		# mask = cv2.erode(mask, None, iterations=2)
+		# mask = cv2.dilate(mask, None, iterations=2)
 		cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[-2]
 		center = None
 		if len(cnts) > 0:
