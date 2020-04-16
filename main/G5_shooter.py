@@ -30,6 +30,8 @@ def callback(msg):
     shoot()
 
 def waiting():
+  rospy.init_node('waiting', anonymous=True)
+
   rospy.Subscriber("shoot_signal", Bool, callback)
   rospy.spin()
     
