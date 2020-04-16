@@ -196,7 +196,7 @@ def searchshoot():
     rospy.init_node('searchshoot', anonymous=True)
 
     # subscribe to odometry data
-     rospy.Subscriber('odom', Odometry, get_odom_dir)
+    rospy.Subscriber('odom', Odometry, get_odom_dir)
 #     # subscribe to LaserScan data
 #     rospy.Subscriber('scan', LaserScan, get_laserscan)
     
