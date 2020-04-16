@@ -19,11 +19,7 @@ import cmath
 import numpy as np
 import time
 import cv2
-from sound_play.msg import SoundRequest
-from sound_play.libsoundplay import SoundClient
 
-import G5_dc_motor
-import G5_stepper
 
 laser_range = np.array([])
 occdata = np.array([])
@@ -153,20 +149,6 @@ def forwardbot():
     pub.publish(twist)
     stopbot()
 
-
-def shoot():
-    dc_left = G5_dc_motor.dc_motor(18)
-    dc_right = G5_dc_motor.dc_motor(12)
-        
-    dc_right.change_pwm(100)
-    dc_left.change_pwm(100)
-
-    G5_stepper.left(300)
-
-    time.sleep(5)
-
-    dc_right.stop()
-    dc_left.stop()
 
 
 def takeaim():
