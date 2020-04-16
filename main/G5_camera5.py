@@ -50,11 +50,12 @@ def talker():
 			c = max(cnts, key=cv2.contourArea)
 			((x, y), radius) = cv2.minEnclosingCircle(c)
 			M = cv2.moments(c)
-			center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-			#print(center)
-			pubx.publish(int(M["m10"] / M["m00"]))
-			puby.publish(int(M["m01"] / M["m00"]))
-			rospy.loginfo(str('x')+str(int(M["m10"] / M["m00"])) + str('y') + str(int(M["m01"] / M["m00"])))
+			if (M["m00"] != 0):
+				center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+				#print(center)
+				pubx.publish(int(M["m10"] / M["m00"]))
+				puby.publish(int(M["m01"] / M["m00"]))
+				rospy.loginfo(str('x')+str(int(M["m10"] / M["m00"])) + str('y') + str(int(M["m01"] / M["m00"])))
 			rate.sleep()
 			# if radius > 10:
 			# 	cv2.circle(frame, (int(x), int(y)), int(radius),(0, 255, 255), 2)

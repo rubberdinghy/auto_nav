@@ -11,25 +11,35 @@ import G5_stepper
 import time
 from std_msgs.msg import Bool
 
-def shoot():
-    dc_left = G5_dc_motor.dc_motor(18)
-    dc_right = G5_dc_motor.dc_motor(12)
-        
-    time.sleep(5)
+dc_left = G5_dc_motor.dc_motor(18)
+dc_right = G5_dc_motor.dc_motor(12)
 
+def shoot():
+    global dc_left
+    global dc_right
+
+    rospy.loginfo("[SHOOTER] Initialising shooting sequence")
+    rospy.loginfo("[SHOOTER] Turning on Motors")
+    
+    
     dc_right.change_pwm(100)
     dc_left.change_pwm(100)
 
+    time.sleep(5)
+
+    rospy.loginfo("[SHOOTER] Loading the ball")
     G5_stepper.left(300)
 
     dc_right.stop()
     dc_left.stop()
 
 def callback(msg):
+  rospy.loginfo("[SHOOTER] Received shoot_signal " + str(msg))
   if msg.data == True:
     shoot()
 
 def waiting():
+  GPIO.setwarnings(False)
   rospy.init_node('waiting', anonymous=True)
 
   rospy.Subscriber("shoot_signal", Bool, callback)
