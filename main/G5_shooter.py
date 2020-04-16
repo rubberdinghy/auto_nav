@@ -9,6 +9,7 @@ import rospy
 import G5_dc_motor
 import G5_stepper
 import time
+rom std_msgs.msg import Bool
 
 def shoot():
     dc_left = G5_dc_motor.dc_motor(18)
@@ -29,7 +30,7 @@ def callback(msg):
     shoot()
 
 def waiting():
-  rospy.Subscriber("shoot_signal", bool, callback)
+  rospy.Subscriber("shoot_signal", Bool, callback)
   rospy.spin()
     
 
