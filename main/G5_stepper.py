@@ -122,11 +122,15 @@ def right(step):
 		
 # Hier faellt die Entscheidung ob links oder rechts herum
 
-while True:
-    dr = str(input('Enter rotation direction (L/R):'))
-    if dr == 'L':
-        left(int(input('value:')))
-    elif dr == 'R':
-	    right(int(input('value:')))
+# while True:
+#     dr = str(input('Enter rotation direction (L/R):'))
+#     if dr == 'L':
+#         left(int(input('value:')))
+#     elif dr == 'R':
+# 	    right(int(input('value:')))
+
+right(1000)
+left(1000)
+
 
 GPIO.cleanup()
