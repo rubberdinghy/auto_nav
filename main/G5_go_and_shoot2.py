@@ -22,11 +22,13 @@ from sound_play.libsoundplay import SoundClient
 
 import G5_dc_motor
 import G5_stepper
-import G5_camera2
+import G5_camera4
 
 
 laser_range = np.array([])
 occdata = np.array([])
+target_x = 0
+target_y = 0
 yaw = 0.0
 rotate_speed = 0.4
 linear_speed = 0.17
@@ -171,11 +173,20 @@ def takeaim():
     
     lr0 = laser_range[0]
     
-    while (abs(lr0 - shoot_distance) < distance_threshold):
-        if (lr0 > shoot_distance):
-            reversebot()
-        elif (lr0 < shoot_distance):
-            forwardbot()
+#     while (abs(lr0 - shoot_distance) < distance_threshold):
+#         if (lr0 > shoot_distance):
+#             reversebot()
+#         elif (lr0 < shoot_distance):
+#             forwardbot()
+            
+    while (abs(target_x - 300) < 5):
+        if (target_x > 300):
+            ros.loginfo("left")
+            rotatebot(-0.5)
+        elif (target_x < 300):
+            ros.loginfo("right")
+            rotatebot(0.5)
+
     
     #check_dir
     #   see the red target on camera. If it is not center, then rotate the bot slowly to center it.
@@ -188,14 +199,28 @@ def searchshoot():
     rospy.init_node('mover', anonymous=True)
 
     # subscribe to odometry data
-    rospy.Subscriber('odom', Odometry, get_odom_dir)
-    # subscribe to LaserScan data
-    rospy.Subscriber('scan', LaserScan, get_laserscan)
-
+#     rospy.Subscriber('odom', Odometry, get_odom_dir)
+#     # subscribe to LaserScan data
+#     rospy.Subscriber('scan', LaserScan, get_laserscan)
+    
+    rospy.Subscriber('coordinates_y', Float32, get_target_y)
+    rospy.Subscriber('coordinates_x', Float32, get_target_x)
+    
     
     takeaim()
     
     return
+                     
+def get_target_y(msg):
+    global target_y
+    target_y = msg
+         
+def get_target_x(msg):
+    global target_x
+    target_x = msg
+    
+
+    
 
 if __name__ == '__main__':
     try:
