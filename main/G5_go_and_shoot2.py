@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
 Created on Thu Apr 16 01:07:53 2020
@@ -6,12 +6,14 @@ Created on Thu Apr 16 01:07:53 2020
 @author: ivanderjmw
 """
 
+
 import rospy
 from nav_msgs.msg import Odometry
 from nav_msgs.msg import OccupancyGrid
 from sensor_msgs.msg import LaserScan
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Twist
+from std_msgs.msg import Float32
 import math
 import cmath
 import numpy as np
@@ -20,8 +22,8 @@ import cv2
 from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient
 
-import G5_dc_motor
-import G5_stepper
+#import G5_dc_motor
+#import G5_stepper
 import G5_camera4
 
 
@@ -29,6 +31,7 @@ laser_range = np.array([])
 occdata = np.array([])
 target_x = 0
 target_y = 0
+
 yaw = 0.0
 rotate_speed = 0.4
 linear_speed = 0.17
@@ -152,6 +155,7 @@ def forwardbot():
     pub.publish(twist)
     stopbot()
 
+"""
 def shoot():
     dc_left = G5_dc_motor.dc_motor(18)
     dc_right = G5_dc_motor.dc_motor(12)
@@ -163,6 +167,7 @@ def shoot():
 
     dc_right.stop()
     dc_left.stop()
+"""
 
 def takeaim():
 
@@ -171,7 +176,7 @@ def takeaim():
     #check_size
     #   if it is too big then move backwards, too small then move fowrards. Can also use the lidar data
     
-    lr0 = laser_range[0]
+    #lr0 = laser_range[0]
     
 #     while (abs(lr0 - shoot_distance) < distance_threshold):
 #         if (lr0 > shoot_distance):
@@ -179,13 +184,23 @@ def takeaim():
 #         elif (lr0 < shoot_distance):
 #             forwardbot()
             
-    while (abs(target_x - 300) < 5):
-        if (target_x > 300):
-            ros.loginfo("left")
-            rotatebot(-0.5)
-        elif (target_x < 300):
-            ros.loginfo("right")
-            rotatebot(0.5)
+#    while (abs(target_x - 300) < 5):
+
+    # while (True):
+    time.sleep(0.5)
+    rospy.loginfo(str(target_x) + " " + str(target_y))
+    if (target_x==0):
+        rospy.loginfo("feed me data!")
+        
+    elif (target_x > 300):
+        rospy.loginfo("left")
+        
+        #rotatebot(-0.5)
+    elif (target_x < 300):
+        rospy.loginfo("right")
+            
+            
+            #rotatebot(0.5)
 
     
     #check_dir
@@ -196,7 +211,7 @@ def searchshoot():
     
     global laser_range
 
-    rospy.init_node('mover', anonymous=True)
+    rospy.init_node('searchshoot', anonymous=True)
 
     # subscribe to odometry data
 #     rospy.Subscriber('odom', Odometry, get_odom_dir)
@@ -206,19 +221,21 @@ def searchshoot():
     rospy.Subscriber('coordinates_y', Float32, get_target_y)
     rospy.Subscriber('coordinates_x', Float32, get_target_x)
     
+
+    while not rospy.is_shutdown():
+        rospy.loginfo("Now taking aim")
+        takeaim()
     
-    takeaim()
-    
-    return
                      
 def get_target_y(msg):
     global target_y
-    target_y = msg
+    target_y = float(str(msg).split(" ")[1])
+    time.sleep(0.5)
          
 def get_target_x(msg):
     global target_x
-    target_x = msg
-    
+    target_x = float(str(msg).split(" ")[1])
+    time.sleep(0.5)
 
     
 

@@ -51,9 +51,12 @@ if __name__ == '__main__' :
             
             if(x == "R"):
                 r_pwm = 100 - r_pwm
+                print("r_pwm :" + str(r_pwm))
+
                 dc_right.change_pwm(r_pwm)
             elif (x == "L"):
                 l_pwm = 100 - l_pwm
+                print("l_pwm :" + str(l_pwm))
                 dc_left.change_pwm(l_pwm)
     
     		#dc_left.change_pwm(100)
