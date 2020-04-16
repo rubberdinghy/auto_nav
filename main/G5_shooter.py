@@ -12,8 +12,6 @@ import time
 from std_msgs.msg import Bool
 
 def shoot():
-    global dc_left
-    global dc_right
 
     rospy.loginfo("[SHOOTER] Initialising shooting sequence")
     rospy.loginfo("[SHOOTER] Turning on Motors")
