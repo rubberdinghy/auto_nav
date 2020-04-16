@@ -56,9 +56,9 @@ def talker():
 			puby.publish(int(M["m01"] / M["m00"]))
 			rospy.loginfo(str('x')+str(int(M["m10"] / M["m00"])) + str('y') + str(int(M["m01"] / M["m00"])))
 			rate.sleep()
-			if radius > 10:
-				cv2.circle(frame, (int(x), int(y)), int(radius),(0, 255, 255), 2)
-				cv2.circle(frame, center, 5, (0, 0, 255), -1)
+			# if radius > 10:
+			# 	cv2.circle(frame, (int(x), int(y)), int(radius),(0, 255, 255), 2)
+			# 	cv2.circle(frame, center, 5, (0, 0, 255), -1)
 		pts.appendleft(center)
 
 		# cv2.imshow("Frame", frame)
