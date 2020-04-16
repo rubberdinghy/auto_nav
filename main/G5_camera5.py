@@ -61,9 +61,9 @@ def talker():
 				cv2.circle(frame, center, 5, (0, 0, 255), -1)
 		pts.appendleft(center)
 
-		cv2.imshow("Frame", frame)
-		if cv2.waitKey(1) & 0xFF==ord('q'):
-			break
+		# cv2.imshow("Frame", frame)
+		# if cv2.waitKey(1) & 0xFF==ord('q'):
+		# 	break
 
 	rospy.spin()
 
