@@ -36,8 +36,6 @@ front_angles = range(-front_angle,front_angle+1,1)
 shoot_distance = .5
 distance_threshold = .02
 
-<<<<<<< HEAD
-=======
 def get_target_y(msg):
     global target_y
     target_y = float(str(msg).split(" ")[1])
@@ -46,7 +44,6 @@ def get_target_x(msg):
     global target_x
     target_x = float(str(msg).split(" ")[1])
 
->>>>>>> 83bc660302a1584370e98f495cca27a82e5208ec
 
 def get_odom_dir(msg):
     global yaw
@@ -177,19 +174,12 @@ def takeaim():
     
     rate = rospy.Rate(5) # Rate of 5 Hz
 
-<<<<<<< HEAD
     shooting = rospy.Publisher('shoot_signal', Bool, queue_size=1)
-=======
->>>>>>> 83bc660302a1584370e98f495cca27a82e5208ec
     # check_dir
     #   see the red target on camera. If it is not center, then rotate the bot slowly to center it.
     while (abs(target_x - 300) > 10):
         rospy.loginfo(str(target_x) + " " + str(target_y))
-<<<<<<< HEAD
         shooting.publish(True)
-=======
-
->>>>>>> 83bc660302a1584370e98f495cca27a82e5208ec
         if (target_x > 300):
             rospy.loginfo("left")
             rotatebot(-1)
@@ -201,13 +191,8 @@ def takeaim():
     
     # When everything is aligned, rotate the bot 180 degrees to shoot.
     rotatebot(180.0)
-<<<<<<< HEAD
-    
-    
-=======
     shooting = rospy.Publisher('shoot_signal', bool, queue_size=1)
     shooting.publish(bool(True))
->>>>>>> 83bc660302a1584370e98f495cca27a82e5208ec
     rospy.loginfo ('Running GUN!')
 
 
@@ -227,15 +212,11 @@ def searchshoot():
     
     rate = rospy.Rate(1) # Rate of 1 Hz
 
-<<<<<<< HEAD
-    rotatebot(90)
-=======
     rospy.loginfo("forwardbot() reversebot() rotatebot(20) rotatebot(70)")
     forwardbot()
     reversebot()
     rotatebot(20)
     rotatebot(70)
->>>>>>> 83bc660302a1584370e98f495cca27a82e5208ec
 
     while not rospy.is_shutdown():
         rospy.loginfo("Now taking aim")
@@ -244,19 +225,6 @@ def searchshoot():
         rate.sleep()
     
                      
-<<<<<<< HEAD
-def get_target_y(msg):
-    global target_y
-    target_y = float(str(msg).split(" ")[1])
-         
-def get_target_x(msg):
-    global target_x
-    target_x = float(str(msg).split(" ")[1])
-=======
-
->>>>>>> 83bc660302a1584370e98f495cca27a82e5208ec
-
-    
 
 if __name__ == '__main__':
     try:

@@ -26,8 +26,8 @@ def shoot():
     rospy.loginfo("[SHOOTER] Loading the ball")
     G5_stepper.left(300)
 
-    dc_right.stop()
-    dc_left.stop()
+    G5_dc_motor.dc_right.stop()
+    G5_dc_motor.dc_left.stop()
 
 def callback(msg):
   rospy.loginfo("[SHOOTER] Received shoot_signal " + str(msg))
