@@ -178,7 +178,7 @@ def takeaim():
     shooting = rospy.Publisher('shoot_signal', Bool, queue_size=1)
     # check_dir
     #   see the red target on camera. If it is not center, then rotate the bot slowly to center it.
-    while (abs(target_x - 300) > 35):
+    while (abs(target_x - 300) > 80):
         time.sleep(0.5)
         rospy.loginfo(str(target_x) + " " + str(target_y))
         shooting.publish(False)
@@ -200,13 +200,15 @@ def takeaim():
         avg_count += 1
         avg_total += target_x
     avg_release = avg_total//10
-    rospy.loginfo(int(300-avg_release))
+    lol=int(300-avg_release)
+    rospy.loginfo(int(lol))
 
     #picamera FoV = 53 degrees Horizontal and 41 degrees Vertical
-    rotatebot(int(((53/600)*(300-avg_release)+180)))
+    rotatebot(int(((53/600)*(lol))))
 
     # When everything is aligned, rotate the bot 180 degrees to shoot.
-    # rotatebot(180.0)
+    rotatebot(90)
+    rotatebot(90)
     shooting.publish(True)
     time.sleep(20)
     rospy.loginfo ('Running GUN!')
