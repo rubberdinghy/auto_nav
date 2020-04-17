@@ -225,6 +225,8 @@ def searchshoot():
     rospy.Subscriber('coordinates_y', Float32, get_target_y)
     rospy.Subscriber('coordinates_x', Float32, get_target_x)
     
+    rospy.on_shutdown(stopbot)
+
     rate = rospy.Rate(1) # Rate of 1 Hz
 
     rospy.loginfo("forwardbot() reversebot() rotatebot(20) rotatebot(-20)")
