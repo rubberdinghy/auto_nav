@@ -27,7 +27,7 @@ def shoot():
   dc_right.change_pwm(100)
   dc_left.change_pwm(100)
 
-  time.sleep(5)
+  time.sleep(15)
 
   rospy.loginfo("[SHOOTER] Loading the ball")
   G5_stepper.left(350)
@@ -41,8 +41,7 @@ def callback(msg):
     shoot()
 
 def waiting():
-  global dc_left
-  global dc_right
+  
   GPIO.setwarnings(False)
   
   rospy.init_node('waiting', anonymous=True)

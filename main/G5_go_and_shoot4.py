@@ -165,13 +165,13 @@ def takeaim():
     #check_size
     #   if it is too big then move backwards, too small then move fowrards. Can also use the lidar data
     
-#     lr0 = laser_range[0]
+    lr0 = laser_range[0]
     
-#     while (abs(lr0 - shoot_distance) < distance_threshold):
-#         if (lr0 > shoot_distance):
-#             reversebot()
-#         elif (lr0 < shoot_distance):
-#             forwardbot()
+    while (abs(lr0 - shoot_distance) < distance_threshold):
+        if (lr0 > shoot_distance):
+            reversebot()
+        elif (lr0 < shoot_distance):
+            forwardbot()
     
     rate = rospy.Rate(5) # Rate of 5 Hz
 

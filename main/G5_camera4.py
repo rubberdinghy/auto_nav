@@ -27,8 +27,8 @@ def talker():
 	ap.add_argument("-b", "--buffer", type=int, default=64,help="max buffer size")
 	args = vars(ap.parse_args())
 
-	greenLower = (29, 86, 6)
-	greenUpper = (64, 255, 255)
+	redLower = (161, 155, 84)
+	redUpper = (179, 255, 255)
 	pts = deque(maxlen=64)
 	if not args.get("video", False):
 		camera = cv2.VideoCapture(0)
@@ -41,7 +41,7 @@ def talker():
 			break
 		frame = imutils.resize(frame, width=600)
 		hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-		mask = cv2.inRange(hsv, greenLower, greenUpper)
+		mask = cv2.inRange(hsv, redLower, redUpper)
 		mask = cv2.erode(mask, None, iterations=2)
 		mask = cv2.dilate(mask, None, iterations=2)
 		cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[-2]
