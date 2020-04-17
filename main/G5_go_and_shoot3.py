@@ -176,16 +176,15 @@ def takeaim():
 
     # check_dir
     #   see the red target on camera. If it is not center, then rotate the bot slowly to center it.
-    while (abs(target_x - 300) > 5):
-        time.sleep(0.5)
+    while (abs(target_x - 300) > 10):
         rospy.loginfo(str(target_x) + " " + str(target_y))
 
         if (target_x > 300):
             rospy.loginfo("left")
-            rotatebot(-2)
+            rotatebot(-1)
         elif (target_x < 300):
             rospy.loginfo("right")
-            rotatebot(2)
+            rotatebot(1)
 
         rate.sleep()
     
