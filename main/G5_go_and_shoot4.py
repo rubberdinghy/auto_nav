@@ -34,7 +34,7 @@ occ_bins = [-1, 0, 100, 101]
 front_angle = 20
 front_angles = range(-front_angle,front_angle+1,1)
 
-shoot_distance = 1
+shoot_distance = 1.5
 distance_threshold = .02
 
 def get_target_y(msg):
