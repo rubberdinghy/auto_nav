@@ -154,7 +154,6 @@ def forwardbot():
     twist.angular.z = 0.0
     time.sleep(1)
     pub.publish(twist)
-    stopbot()
 
 
 
@@ -167,12 +166,11 @@ def takeaim():
     
     lr0 = laser_range[0]
     
-    while (abs(lr0 - shoot_distance) < distance_threshold):
-        if (lr0 > shoot_distance):
-            reversebot()
-        elif (lr0 < shoot_distance):
-            forwardbot()
     
+    while (lr0 > shoot_distance)
+
+    stopbot()
+     
     rate = rospy.Rate(5) # Rate of 5 Hz
 
     shooting = rospy.Publisher('shoot_signal', Bool, queue_size=1)
