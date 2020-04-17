@@ -196,15 +196,15 @@ def takeaim():
     avg_count = 0
     avg_total = 0
     avg_release = 0
-    while avg_count<10:
+    while avg_count<20:
         avg_count += 1
         avg_total += target_x
-    avg_release = avg_total//10
+    avg_release = avg_total//20
     lol=int(300-avg_release)
     rospy.loginfo(int(lol))
 
     #picamera FoV = 53 degrees Horizontal and 41 degrees Vertical
-    rotatebot(int(((53/600)*(lol))))
+    rotatebot(int(((-53/600)*(lol))))
 
     # When everything is aligned, rotate the bot 180 degrees to shoot.
     rotatebot(90)
