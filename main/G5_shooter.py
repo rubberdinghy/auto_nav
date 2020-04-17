@@ -12,24 +12,28 @@ import time
 import RPi.GPIO as GPIO
 from std_msgs.msg import Bool
 
+dc_left = G5_dc_motor.dc_motor(18)
+dc_right = G5_dc_motor.dc_motor(12)
+
+
 def shoot():
-  global G5_dc_motor.dc_left
-  global G5_dc_motor.dc_right
+  global dc_left
+  global dc_right
 
   rospy.loginfo("[SHOOTER] Initialising shooting sequence")
   rospy.loginfo("[SHOOTER] Turning on Motors")
   
   
-  G5_dc_motor.dc_right.change_pwm(100)
-  G5_dc_motor.dc_left.change_pwm(100)
+  dc_right.change_pwm(100)
+  dc_left.change_pwm(100)
 
   time.sleep(5)
 
   rospy.loginfo("[SHOOTER] Loading the ball")
   G5_stepper.left(350)
 
-  G5_dc_motor.dc_right.stop()
-  G5_dc_motor.dc_left.stop()
+  dc_right.stop()
+  dc_left.stop()
 
 def callback(msg):
   rospy.loginfo("[SHOOTER] Received shoot_signal " + str(msg))
@@ -37,7 +41,10 @@ def callback(msg):
     shoot()
 
 def waiting():
+  global dc_left
+  global dc_right
   GPIO.setwarnings(False)
+  
   rospy.init_node('waiting', anonymous=True)
 
   rospy.Subscriber("shoot_signal", Bool, callback)

@@ -38,12 +38,13 @@ class dc_motor(object):
         self.pwm.stop()
         
         
-dc_left = dc_motor(18)
-dc_right = dc_motor(12)
+
 
 
 if __name__ == '__main__' :
     try:
+        dc_left = dc_motor(18)
+        dc_right = dc_motor(12)
         r_pwm = 0
         l_pwm = 0
         while  (True) :
