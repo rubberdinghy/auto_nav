@@ -34,7 +34,7 @@ occ_bins = [-1, 0, 100, 101]
 front_angle = 20
 front_angles = range(-front_angle,front_angle+1,1)
 
-shoot_distance = .5
+shoot_distance = 1
 distance_threshold = .02
 
 def get_target_y(msg):
@@ -143,7 +143,6 @@ def reversebot():
     twist.angular.z = 0.0
     time.sleep(1)
     pub.publish(twist)
-    stopbot()
     
 def forwardbot():
     # publish to cmd_vel to move TurtleBot
@@ -164,13 +163,15 @@ def takeaim():
     #check_size
     #   if it is too big then move backwards, too small then move fowrards. Can also use the lidar data
     
-    lr0 = laser_range[0]
+    lr0 = laser_range[180]
+    reversebot()
     
+    while (lr0 > shoot_distance):
+        lr0 = laser_range[180]
     
-    while (lr0 > shoot_distance)
-
     stopbot()
-     
+    rospy.loginfo("Now searching for target at distance : " + str(lr0) + "m from wall")
+    
     rate = rospy.Rate(5) # Rate of 5 Hz
 
     shooting = rospy.Publisher('shoot_signal', Bool, queue_size=1)
@@ -182,11 +183,11 @@ def takeaim():
         shooting.publish(False)
         if (target_x > 300):
             rospy.loginfo("left")
-            rotatebot(-1)
+            rotatebot(-0.5)
             stopbot()
         elif (target_x < 300):
             rospy.loginfo("right")
-            rotatebot(1)
+            rotatebot(0.5)
             stopbot()
 
         rate.sleep()
@@ -220,21 +221,22 @@ def searchshoot():
 
     # subscribe to odometry data
     rospy.Subscriber('odom', Odometry, get_odom_dir)
-#     # subscribe to LaserScan data
-#     rospy.Subscriber('scan', LaserScan, get_laserscan)
+    # subscribe to LaserScan data
+    rospy.Subscriber('scan', LaserScan, get_laserscan)
     
     rospy.Subscriber('coordinates_y', Float32, get_target_y)
     rospy.Subscriber('coordinates_x', Float32, get_target_x)
     
     rate = rospy.Rate(1) # Rate of 1 Hz
-
-    rospy.loginfo("forwardbot() reversebot() rotatebot(20) rotatebot(-20)")
-    forwardbot()
-    reversebot()
-    rospy.loginfo("testing...")
-    rotatebot(10)
-    rotatebot(-20)
-    rotatebot(10)
+    
+    time.sleep(5)
+#    rospy.loginfo("forwardbot() reversebot() rotatebot(20) rotatebot(-20)")
+#    forwardbot()
+#    reversebot()
+#    rospy.loginfo("testing...")
+#    rotatebot(10)
+#    rotatebot(-20)
+#    rotatebot(10)
 
     while not rospy.is_shutdown():
         rospy.loginfo("Now taking aim")
