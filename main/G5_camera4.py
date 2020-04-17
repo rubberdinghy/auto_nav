@@ -27,7 +27,7 @@ def talker():
 	ap.add_argument("-b", "--buffer", type=int, default=64,help="max buffer size")
 	args = vars(ap.parse_args())
 
-	redLower = (161, 155, 84)
+	redLower = (161, 110, 84)
 	redUpper = (179, 255, 255)
 	pts = deque(maxlen=64)
 	if not args.get("video", False):
