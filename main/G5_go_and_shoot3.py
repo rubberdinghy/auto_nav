@@ -14,7 +14,6 @@ from sensor_msgs.msg import LaserScan
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32
-from std_msgs.msg import Bool
 import math
 import cmath
 import numpy as np
@@ -36,14 +35,6 @@ front_angles = range(-front_angle,front_angle+1,1)
 
 shoot_distance = .5
 distance_threshold = .02
-
-def get_target_y(msg):
-    global target_y
-    target_y = float(str(msg).split(" ")[1])
-         
-def get_target_x(msg):
-    global target_x
-    target_x = float(str(msg).split(" ")[1])
 
 
 def get_odom_dir(msg):
@@ -178,36 +169,23 @@ def takeaim():
     shooting = rospy.Publisher('shoot_signal', Bool, queue_size=1)
     # check_dir
     #   see the red target on camera. If it is not center, then rotate the bot slowly to center it.
-    while (abs(target_x - 300) > 35):
+    while (abs(target_x - 300) > 5):
         time.sleep(0.5)
         rospy.loginfo(str(target_x) + " " + str(target_y))
-        shooting.publish(False)
+        shooting.publish(True)
         if (target_x > 300):
             rospy.loginfo("left")
-            rotatebot(-1)
-            stopbot()
+            rotatebot(-2)
         elif (target_x < 300):
             rospy.loginfo("right")
-            rotatebot(1)
-            stopbot()
+            rotatebot(2)
 
         rate.sleep()
     
-    avg_count = 0
-    avg_total = 0
-    avg_release = 0
-    while avg_count<10:
-        avg_count += 1
-        avg_total += target_x
-    avg_release = avg_total//10
-    rospy.loginfo(int(300-avg_release))
-
-    #picamera FoV = 53 degrees Horizontal and 41 degrees Vertical
-    rotatebot(int((53/600)*(300-avg_release)))
-
     # When everything is aligned, rotate the bot 180 degrees to shoot.
     rotatebot(180.0)
-    shooting.publish(True)
+    
+    
     rospy.loginfo ('Running GUN!')
 
 
@@ -227,13 +205,7 @@ def searchshoot():
     
     rate = rospy.Rate(1) # Rate of 1 Hz
 
-    rospy.loginfo("forwardbot() reversebot() rotatebot(20) rotatebot(-20)")
-    forwardbot()
-    reversebot()
-    rospy.loginfo("testing...")
-    rotatebot(10)
-    rotatebot(-20)
-    rotatebot(10)
+    rotatebot(90)
 
     while not rospy.is_shutdown():
         rospy.loginfo("Now taking aim")
@@ -242,7 +214,13 @@ def searchshoot():
         rate.sleep()
     
                      
-
+def get_target_y(msg):
+    global target_y
+    target_y = float(str(msg).split(" ")[1])
+         
+def get_target_x(msg):
+    global target_x
+    target_x = float(str(msg).split(" ")[1])
 
     
 
