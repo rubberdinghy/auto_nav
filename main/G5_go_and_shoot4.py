@@ -203,10 +203,10 @@ def takeaim():
     rospy.loginfo(int(300-avg_release))
 
     #picamera FoV = 53 degrees Horizontal and 41 degrees Vertical
-    rotatebot(int((53/600)*(300-avg_release)))
+    rotatebot(int(((53/600)*(300-avg_release)+180)))
 
     # When everything is aligned, rotate the bot 180 degrees to shoot.
-    rotatebot(180.0)
+    # rotatebot(180.0)
     shooting.publish(True)
     time.sleep(20)
     rospy.loginfo ('Running GUN!')
