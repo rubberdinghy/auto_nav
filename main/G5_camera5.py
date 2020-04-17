@@ -27,8 +27,8 @@ def talker():
 	ap.add_argument("-b", "--buffer", type=int, default=64,help="max buffer size")
 	args = vars(ap.parse_args())
 
-	greenLower = (29, 86, 6)
-	greenUpper = (64, 255, 255)
+	redLower = (161, 110, 84)
+	redUpper = (179, 255, 255)
 	pts = deque(maxlen=64)
 	if not args.get("video", False):
 		camera = cv2.VideoCapture(0)
