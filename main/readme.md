@@ -13,16 +13,51 @@ Before using these python scripts, a pre-installation of the following programs 
 Accomplished using running `G5_auto_nav3.py`
 ### Preparation
 * Run ROS Master in the Main Computer
-```roscore```
+```
+roscore
+```
 * SSH to RaspBerry Pi and Launch TurtleBot3 Bringup
-```roslaunch turtlebot3_bringup turtlebot3_robot.launch```
+```
+roslaunch turtlebot3_bringup turtlebot3_robot.launch
+```
 ### Usage
-The use of this code is for the Turtlebot to map an enclosed maze, and the turtlebot will move autonomously to try mapping all sections of the maze. When the mapping is complete, the computer will play a sound.
+The use of this code is for the Turtlebot to map an enclosed maze, and the turtlebot will move autonomously to try mapping all sections of the maze. When the mapping is complete, the computer will play a sound. Run the following inside the Main Computer while ROS Master is running.
 * Launch Rviz
-```roslaunch turtlebot3_slam turtlebot3_slam.launch slam_methods:=gmapping```
+```
+roslaunch turtlebot3_slam turtlebot3_slam.launch slam_methods:=gmapping
+```
 * Run Auto_Nav code
-```rosrun auto_nav G5_auto_nav3.py```
+```
+rosrun auto_nav G5_auto_nav3.py
+```
 
 ## Target Detection and Shooting
-Accomplished using G5_go_and_shoot4.py, G5_shooter.py, and G5_camera.py
+Accomplished using `G5_go_and_shoot4.py`, `G5_shooter.py`, and `G5_camera5.py`
+### Preparation
+* Hardware Preparation
+As written in `G5_shooter.py`, the left motor control is connected in Pin 18 and right motor control is connected in Pin 12, both are active-High control.
+
+* Run ROS Master in the Main Computer
+```
+roscore
+```
+* SSH to RaspBerry Pi and enter the following in separate command line windows
+For robot bring up
+```
+roslaunch turtlebot3_bringup turtlebot3_robot.launch
+```
+For motor control
+```
+rosrun auto_nav G5_shooter.py
+```
+For camera color detection
+```
+rosrun auto_nav G5_camera5.py
+```
+
 ### Usage
+In this mode, the robot will go forward indefinitely until it reaches a wall. It will then stop at around 40cm before the wall, and will rotate to find the target. The target detection is made for the color red. After successfully aiming at the target, the robot will rotate 180 degrees to shooting mode. It will then trigger the motor wheels. To do this, run the following in the Main Computer's terminal.
+```
+rosrun auto_nav G5_go_and_shoot4.py
+```
+
