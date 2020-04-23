@@ -1,3 +1,5 @@
+#The codes used for the video are under main folder. Please refer to the readme.md under that folder for inspection of those codes.
+
 # The Turtle-Bot Project for EG2310  - Group 5 AY1920
 This is a student project utilising the Robot Operating Syestem (ROS) on a turtlebot-burger. The code is written in python and is run in a Raspberry Pi 3 Model B+.
 - Nguyen Tuan Dung
